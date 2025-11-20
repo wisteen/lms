@@ -36,12 +36,14 @@
                         </td>
                         {% for subject in subjects %}
                         <td class="px-3 py-2 whitespace-nowrap text-center text-sm">
-                            {% if data.results|lookup:subject.code %}
-                                <div class="text-gray-900">{{ data.results|lookup:subject.code.total }}</div>
-                                <div class="text-xs text-gray-500">{{ data.results|lookup:subject.code.grade }}</div>
-                            {% else %}
-                                <div class="text-gray-400">-</div>
-                            {% endif %}
+                            {% with result=data.results|lookup:subject.code %}
+                                {% if result %}
+                                    <div class="text-gray-900">{{ result.total }}</div>
+                                    <div class="text-xs text-gray-500">{{ result.grade }}</div>
+                                {% else %}
+                                    <div class="text-gray-400">-</div>
+                                {% endif %}
+                            {% endwith %}
                         </td>
                         {% endfor %}
                         <td class="px-3 py-2 whitespace-nowrap text-center text-sm font-medium">
