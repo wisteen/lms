@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Quiz Management{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <div class="flex justify-between items-center">
+            <h2 class="text-2xl font-bold text-gray-900">Quiz Management</h2>
+            <a href="{% url 'create_quiz' %}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                ➕ Create New Quiz
+            </a>
+        </div>
+    </div>
+
+    <!-- Quizzes List -->
+    <div class="grid grid-cols-1 gap-6">
+        {% for quiz in quizzes %}
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-900">{{ quiz.title }}</h3>
+                    <p class="text-gray-600">{{ quiz.subject.name }} - {{ quiz.school_class.name }}</p>
+                </div>
+                <span class="px-3 py-1 rounded-full text-sm font-medium
+                    {% if quiz.status == 'live' %}bg-green-100 text-green-800
+                    {% elif quiz.status == 'scheduled' %}bg-blue-100 text-blue-800
+                    {% elif quiz.status == 'ended' %}bg-gray-100 text-gray-800
+                    {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                    {{ quiz.get_status_display }}
+                </span>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div class="text-sm">
+                    <span class="text-gray-500">Questions:</span>
+                    <span class="font-medium">{{ quiz.questions.count }}</span>
+                </div>
+                <div class="text-sm">
+                    <span class="text-gray-500">Attempts:</span>
+                    <span class="font-medium">{{ quiz.quizattempt_set.count }}</span>
+                </div>
+                <div class="text-sm">
+                    <span class="text-gray-500">Start:</span>
+                    <span class="font-medium">{{ quiz.start_time|date:"M d, H:i" }}</span>
+                </div>
+                <div class="text-sm">
+                    <span class="text-gray-500">End:</span>
+                    <span class="font-medium">{{ quiz.end_time|date:"M d, H:i" }}</span>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2 mb-4 text-sm">
+                {% if quiz.shuffle_questions %}<span class="bg-blue-50 text-blue-700 px-2 py-1 rounded">🔀 Shuffle Questions</span>{% endif %}
+                {% if quiz.shuffle_options %}<span class="bg-blue-50 text-blue-700 px-2 py-1 rounded">🔀 Shuffle Options</span>{% endif %}
+                {% if quiz.full_screen_mode %}<span class="bg-purple-50 text-purple-700 px-2 py-1 rounded">🖥️ Full Screen</span>{% endif %}
+                {% if quiz.detect_tab_switching %}<span class="bg-red-50 text-red-700 px-2 py-1 rounded">👁️ Tab Detection</span>{% endif %}
+            </div>
+
+            <div class="flex space-x-2">
+                <a href="{% url 'edit_quiz' quiz.id %}" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                    ✏️ Edit
+                </a>
+                <a href="{% url 'add_questions' quiz.id %}" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
+                    ➕ Questions
+                </a>
+                <a href="{% url 'quiz_results' quiz.id %}" class="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700">
+                    📊 Results
+                </a>
+                <a href="{% url 'grade_theory' quiz.id %}" class="bg-orange-600 text-white px-3 py-1 rounded text-sm hover:bg-orange-700">
+                    ✍️ Grade Theory
+                </a>
+                <button onclick="deleteQuiz({{ quiz.id }})" class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">
+                    🗑️ Delete
+                </button>
+            </div>
+        </div>
+        {% empty %}
+        <div class="bg-white rounded-lg shadow p-12 text-center">
+            <p class="text-gray-500 mb-4">No quizzes created yet</p>
+            <a href="{% url 'create_quiz' %}" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+                Create Your First Quiz
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function deleteQuiz(quizId) {
+    if (confirm('Are you sure you want to delete this quiz? This action cannot be undone.')) {
+        fetch(`/api/delete-quiz/${quizId}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        });
+    }
+}
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+</script>
+{% endblock %}

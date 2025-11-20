@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Result Card - {{ student.user.get_full_name }}</title>
+    <style>
+        @media print {
+            .no-print { display: none; }
+        }
+        body {
+            font-family: 'Times New Roman', serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        .result-card {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-bottom: 5px solid gold;
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .header-left {
+            flex: 0 0 20%;
+            text-align: center;
+        }
+        .header-right {
+            flex: 0 0 80%;
+            text-align: left;
+        }
+        .logo-watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 550px;
+            opacity: 0.08;
+            pointer-events: none;
+            z-index: 3;
+        }
+        .school-logo {
+            width: 100%;
+            max-width: 220px;
+            height: auto;
+            border-radius: 0;
+            border: none;
+        }
+        .content {
+            padding: 30px;
+            position: relative;
+            z-index: 2;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #667eea;
+            color: white;
+        }
+        .grade-A { background: #d4edda; }
+        .grade-B { background: #d1ecf1; }
+        .grade-C { background: #fff3cd; }
+        .grade-D { background: #f8d7da; }
+        .grade-F { background: #f5c6cb; }
+        .seal {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 170px;
+            opacity: 1;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .signature {
+            width: 150px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="result-card">
+        <div class="header" style="display: flex; justify-content: center;">
+                <h1 style="margin-top: 10px; margin-bottom: 0; font-size: 38px;text-align: center;">STUDENT REPORT CARD</h1>
+        </div>
+
+        <div class="header">
+
+            <div class="header-left">
+                {% if school_settings.school_logo %}
+                <img src="{{ school_settings.school_logo.url }}" class="school-logo">
+                {% endif %}
+            </div>
+            <div class="header-right">
+                <h1 style="margin: 0; font-size: 34px; text-transform: uppercase;">{{ school_settings.school_name|default:"SCHOOL NAME" }}</h1>
+                <p style="margin: 4px 0;">{{ school_settings.school_address|default:"School Address" }}</p>
+                <p style="margin: 4px 0; font-style: italic;">Motto:{{ school_settings.school_motto|default:"" }}</p>
+                <p style="margin: 2px 0;">{{ term.name }}</p>
+            </div>
+        </div>
+
+        {% if school_settings.school_logo %}
+        <img src="{{ school_settings.school_logo.url }}" class="logo-watermark">
+        {% endif %}
+        {% if school_settings.school_seal %}
+        <img src="{{ school_settings.school_seal.url }}" class="seal">
+        {% endif %}
+        
+        <div class="content">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+                <div style="flex: 1;">
+                    <p><strong>Student Name:</strong> {{ student.user.get_full_name }}</p>
+                    <p><strong>Student ID:</strong> {{ student.student_id }}</p>
+                    <p><strong>Class:</strong> {{ student.school_class.name }}</p>
+                    <p><strong>Position:</strong> {{ position }} of {{ total_students }}</p>
+                    <p><strong>Total Attendance:</strong>
+                        {% if attendance %}{{ attendance.days_present }}/{{ attendance.total_days }}{% else %}-{% endif %}
+                    </p>
+                </div>
+                {% if student.passport_photo %}
+                <div>
+                    <img src="{{ student.passport_photo.url }}" style="width: 100px; height: 120px; border: 2px solid #667eea;">
+                </div>
+                {% endif %}
+            </div>
+            
+            <h3 style="background: #667eea; color: white; padding: 10px;">ACADEMIC PERFORMANCE</h3>
+            <div style="display: flex; gap: 20px; align-items: flex-start; margin: 10px 0 20px;">
+                <div style="flex: 2;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Score</th>
+                                <th>Grade</th>
+                                <th>Remark</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in results %}
+                            <tr class="grade-{{ result.grade }}">
+                                <td>{{ result.subject.name }}</td>
+                                <td>{{ result.total_score|floatformat:1 }}</td>
+                                <td><strong>{{ result.grade }}</strong></td>
+                                <td>{{ result.remark }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 10px 0 30px; font-size: 14px;">
+                        <div><strong>Total Score:</strong> {{ total_score|floatformat:1 }}</div>
+                        <div><strong>Overall Percentage:</strong> {{ overall_percentage|floatformat:2 }}%</div>
+                        <div><strong>Overall Grade:</strong> {{ overall_grade|default:"-" }}</div>
+                        <div><strong>Overall Remark:</strong> {{ overall_remark|default:"-" }}</div>
+                        <div><strong>Position in Class:</strong> {{ position }} of {{ total_students }}</div>
+                        <div><strong>Highest Average in Class:</strong> {{ class_highest|floatformat:2 }}%</div>
+                        <div><strong>Class Average:</strong> {{ class_average|floatformat:2 }}%</div>
+                        <div><strong>Lowest Average in Class:</strong> {{ class_lowest|floatformat:2 }}%</div>
+                    </div>
+                </div>
+
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
+                    <div>
+                        <h4 style="background: #667eea; color: white; padding: 8px;">GRADING SYSTEM</h4>
+                        <table style="font-size: 12px;">
+                            <tr><td>A+ (90-100)</td><td>Excellent</td></tr>
+                            <tr><td>A (80-89)</td><td>Very Good</td></tr>
+                            <tr><td>B (70-79)</td><td>Good</td></tr>
+                            <tr><td>C (60-69)</td><td>Credit</td></tr>
+                            <tr><td>D (50-59)</td><td>Pass</td></tr>
+                            <tr><td>F (0-49)</td><td>Fail</td></tr>
+                        </table>
+                    </div>
+
+                    <div>
+                        <h4 style="background: #667eea; color: white; padding: 8px;">EFFECTIVE DOMAIN</h4>
+                        <table style="font-size: 12px;">
+                            <thead>
+                                <tr>
+                                    <th>Trait</th>
+                                    <th>Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Punctuality</td>
+                                    <td>{% if effective_domain %}{{ effective_domain.punctuality }}{% endif %}</td>
+                                </tr>
+                                <tr>
+                                    <td>Neatness</td>
+                                    <td>{% if effective_domain %}{{ effective_domain.neatness }}{% endif %}</td>
+                                </tr>
+                                <tr>
+                                    <td>Attentiveness</td>
+                                    <td>{% if effective_domain %}{{ effective_domain.attentiveness }}{% endif %}</td>
+                                </tr>
+                                <tr>
+                                    <td>Politeness</td>
+                                    <td>{% if effective_domain %}{{ effective_domain.politeness }}{% endif %}</td>
+                                </tr>
+                                <tr>
+                                    <td>Relationship with Others</td>
+                                    <td>{% if effective_domain %}{{ effective_domain.relationship_with_others }}{% endif %}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div>
+                        <h4 style="background: #667eea; color: white; padding: 8px;">PSYCHOMOTOR</h4>
+                        <table style="font-size: 12px;">
+                            <thead>
+                                <tr>
+                                    <th>Skill</th>
+                                    <th>Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Sports / Games</td>
+                                    <td>{% if psychomotor %}{{ psychomotor.sports_games }}{% endif %}</td>
+                                </tr>
+                                <tr>
+                                    <td>Handwriting</td>
+                                    <td>{% if psychomotor %}{{ psychomotor.handwriting }}{% endif %}</td>
+                                </tr>
+                                <tr>
+                                    <td>Drawing & Painting</td>
+                                    <td>{% if psychomotor %}{{ psychomotor.drawing_painting }}{% endif %}</td>
+                                </tr>
+                                <tr>
+                                    <td>Crafts</td>
+                                    <td>{% if psychomotor %}{{ psychomotor.crafts }}{% endif %}</td>
+                                </tr>
+                                <tr>
+                                    <td>Music / Drama</td>
+                                    <td>{% if psychomotor %}{{ psychomotor.music_drama }}{% endif %}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            {% if comment %}
+            <div style="margin: 20px 0;">
+                <h4 style="background: #667eea; color: white; padding: 8px;">CLASS TEACHER'S COMMENT</h4>
+                <p style="padding: 10px; border: 1px solid #ddd;">{{ comment.teacher_comment|default:"No comment" }}</p>
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <h4 style="background: #667eea; color: white; padding: 8px;">PRINCIPAL'S COMMENT</h4>
+                <p style="padding: 10px; border: 1px solid #ddd;">{{ comment.proprietor_comment|default:"No comment" }}</p>
+            </div>
+            {% endif %}
+            
+            <div style="display: flex; justify-content: space-between; margin-top: 40px;">
+                <div style="text-align: center;">
+                    {% if school_settings.principal_signature %}
+                    <img src="{{ school_settings.principal_signature.url }}" class="signature">
+                    {% endif %}
+                    <p style="border-top: 2px solid black; padding-top: 5px; margin-top: 10px;">
+                        <strong>{{ school_settings.principal_name|default:"Principal" }}</strong><br>
+                        Principal's Signature
+                    </p>
+                </div>
+                <div style="text-align: center;">
+                    <p style="margin-top: 60px; border-top: 2px solid black; padding-top: 5px;">
+                        Date: {{ term.end_date|date:"d/m/Y" }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="no-print" style="text-align: center; margin: 20px;">
+        <button onclick="printResultAsImage()" style="background: #667eea; color: white; padding: 15px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
+            Print Result Card
+        </button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script>
+        function printResultAsImage() {
+            const card = document.querySelector('.result-card');
+            if (!card) {
+                window.print();
+                return;
+            }
+
+            html2canvas(card, { scale: 2 }).then((canvas) => {
+                // Target A4 size in CSS pixels (approx. 96 DPI) with some margin
+                const A4_WIDTH_PX = 794 - 80;   // 8.27in * 96px - margin
+                const A4_HEIGHT_PX = 1123 - 80; // 11.69in * 96px - margin
+
+                const originalWidth = canvas.width;
+                const originalHeight = canvas.height;
+
+                // Scale the captured card so it fits completely within an A4 page
+                const scaleFactor = Math.min(
+                    A4_WIDTH_PX / originalWidth,
+                    A4_HEIGHT_PX / originalHeight,
+                    1 // never upscale
+                );
+
+                let finalCanvas = canvas;
+                if (scaleFactor < 1) {
+                    const scaledCanvas = document.createElement('canvas');
+                    scaledCanvas.width = Math.floor(originalWidth * scaleFactor);
+                    scaledCanvas.height = Math.floor(originalHeight * scaleFactor);
+
+                    const ctx = scaledCanvas.getContext('2d');
+                    ctx.drawImage(canvas, 0, 0, scaledCanvas.width, scaledCanvas.height);
+                    finalCanvas = scaledCanvas;
+                }
+
+                const dataUrl = finalCanvas.toDataURL('image/png');
+                const win = window.open('', '_blank');
+                if (!win) {
+                    // Popup blocked; fallback to normal print
+                    window.print();
+                    return;
+                }
+
+                const imgWidth = finalCanvas.width;
+
+                win.document.write('<html><head><title>Result Card</title>');
+                win.document.write('<style>@page { size: A4 portrait; margin: 10mm; } body { margin: 0; } img { display: block; margin: 0 auto; }</style>');
+                win.document.write('</head><body>');
+                win.document.write('<img src="' + dataUrl + '" style="width:' + imgWidth + 'px; height:auto;" />');
+                win.document.write('</body></html>');
+                win.document.close();
+                win.focus();
+                win.onload = function () {
+                    win.print();
+                };
+            }).catch(() => {
+                // If capturing fails, fallback to normal print
+                window.print();
+            });
+        }
+    </script>
+</body>
+</html>

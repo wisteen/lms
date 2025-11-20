@@ -1,0 +1,93 @@
+{% extends 'website/base.html' %}
+{% load static %}
+
+{% block title %}Academics - Dan-Gracious Land High School{% endblock %}
+
+{% block content %}
+<section class="py-14 bg-white">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-center text-3xl sm:text-4xl font-bold text-gray-900 mb-10">Academics</h1>
+
+        <!-- Curriculum -->
+        <div class="grid gap-8 md:grid-cols-2 items-center mb-12">
+            <div class="order-2 md:order-1">
+                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-primary mb-2">Our Curriculum</p>
+                <h2 class="text-2xl font-semibold text-gray-900 mb-3">Broad, balanced and future-focused</h2>
+                <p class="text-sm text-gray-600 mb-3">At Dan-Gracious Land High School, we offer a curriculum that blends strong academic foundations with practical learning experiences.</p>
+                <ul class="space-y-2 text-sm text-gray-700">
+                    <li class="flex items-start"><i class="fas fa-check-circle text-primary mt-1 mr-2"></i> Junior Secondary School (JSS 11113).</li>
+                    <li class="flex items-start"><i class="fas fa-check-circle text-primary mt-1 mr-2"></i> Senior Secondary School (SSS 11113) with clear academic and career guidance.</li>
+                    <li class="flex items-start"><i class="fas fa-check-circle text-primary mt-1 mr-2"></i> Science, Arts and Commercial departments to match students&#39; strengths and interests.</li>
+                    <li class="flex items-start"><i class="fas fa-check-circle text-primary mt-1 mr-2"></i> Practical-based learning in ICT, well-equipped laboratories and skill-building programmes.</li>
+                </ul>
+            </div>
+            <div class="order-1 md:order-2">
+                <div class="rounded-3xl overflow-hidden shadow-lg border border-gray-100">
+                    <img src="{% static 'website/img/classroom.jpg' %}" alt="Classroom" class="w-full h-full object-cover">
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div class="mb-12 rounded-3xl bg-gray-50 border border-gray-100 px-6 sm:px-10 py-8 text-center">
+            <h2 class="text-2xl font-semibold text-gray-900 mb-1">Academic Achievements</h2>
+            <p class="text-sm text-gray-600 mb-6">We have a consistent track record of excellence in external examinations.</p>
+            <div class="grid gap-4 sm:gap-6 sm:grid-cols-3">
+                <div class="bg-white rounded-2xl shadow-sm px-4 py-5">
+                    <p class="text-xs uppercase tracking-[0.18em] text-gray-500 mb-1">WAEC</p>
+                    <p class="text-3xl font-extrabold text-emerald-500 mb-1">98%</p>
+                    <p class="text-xs text-gray-600">Average pass rate</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm px-4 py-5">
+                    <p class="text-xs uppercase tracking-[0.18em] text-gray-500 mb-1">NECO</p>
+                    <p class="text-3xl font-extrabold text-emerald-500 mb-1">100%</p>
+                    <p class="text-xs text-gray-600">Pass rate in core subjects</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm px-4 py-5">
+                    <p class="text-xs uppercase tracking-[0.18em] text-gray-500 mb-1">Admissions</p>
+                    <p class="text-3xl font-extrabold text-emerald-500 mb-1">50+</p>
+                    <p class="text-xs text-gray-600">University admissions yearly</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Extracurriculars -->
+        <div>
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-semibold text-gray-900 mb-1">Beyond the Classroom</h2>
+                <p class="text-sm text-gray-600">We believe in total development through sports, clubs and societies.</p>
+            </div>
+            <div class="grid gap-6 md:grid-cols-4 text-sm">
+                <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col">
+                    <img src="https://source.unsplash.com/400x300/?soccer" alt="Sports" class="h-36 w-full object-cover">
+                    <div class="p-4 flex-1 flex flex-col">
+                        <h3 class="text-base font-semibold mb-1">Sports</h3>
+                        <p class="text-xs text-gray-600 flex-1">Football, basketball, athletics and more to build teamwork, discipline and resilience.</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col">
+                    <img src="https://source.unsplash.com/400x300/?robotics" alt="Clubs" class="h-36 w-full object-cover">
+                    <div class="p-4 flex-1 flex flex-col">
+                        <h3 class="text-base font-semibold mb-1">Clubs</h3>
+                        <p class="text-xs text-gray-600 flex-1">Robotics, JETS Club, Literary &amp; Debating Society and other interest-based groups.</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col">
+                    <img src="https://source.unsplash.com/400x300/?music,choir" alt="Music" class="h-36 w-full object-cover">
+                    <div class="p-4 flex-1 flex flex-col">
+                        <h3 class="text-base font-semibold mb-1">Music &amp; Arts</h3>
+                        <p class="text-xs text-gray-600 flex-1">School choir, drama troupe and cultural groups help students express their talents.</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col">
+                    <img src="https://source.unsplash.com/400x300/?scouts" alt="Societies" class="h-36 w-full object-cover">
+                    <div class="p-4 flex-1 flex flex-col">
+                        <h3 class="text-base font-semibold mb-1">Societies</h3>
+                        <p class="text-xs text-gray-600 flex-1">Red Cross, Boys Scouts, Girls Guide and more to build leadership and service.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

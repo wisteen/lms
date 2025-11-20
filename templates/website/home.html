@@ -1,0 +1,484 @@
+{% extends 'website/base.html' %}
+{% load static %}
+
+{% block title %}Home - Dan-Gracious Land High School{% endblock %}
+
+{% block content %}
+<!-- Hero Carousel -->
+<section class="relative overflow-hidden bg-gradient-to-br from-darker via-dark to-gray-900 text-white">
+    <div class="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_top,_#FCD34D_0,_transparent_55%),_radial-gradient(circle_at_bottom,_#1D4ED8_0,_transparent_55%)]"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 flex flex-col lg:flex-row gap-10 items-center">
+        <!-- Carousel Content -->
+        <div class="w-full lg:w-3/5">
+            <p class="inline-flex items-center text-xs font-semibold tracking-[0.25em] uppercase text-primary/90 mb-4">
+                <span class="w-6 h-px bg-primary mr-3"></span>
+                Knowledge is Wealth
+            </p>
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-tight mb-4">
+                <span class="block gradient-text">Dan-Gracious Land High School</span>
+                <span class="block text-gray-100 mt-2">Nurturing Leaders of Tomorrow</span>
+            </h1>
+            <p class="text-base sm:text-lg text-gray-200 max-w-xl mb-6">
+                Providing quality education with academic excellence, character formation and total child development in a safe and vibrant learning community.
+            </p>
+
+            <!-- Carousel Slides -->
+            <div id="hero-carousel" class="relative bg-white/5 backdrop-blur rounded-2xl border border-white/10 shadow-xl overflow-hidden">
+                <div class="p-5 sm:p-6 lg:p-7 min-h-[210px]">
+                    <!-- Slide 1: Director's Welcome -->
+                    <div class="hero-slide flex gap-4 sm:gap-6" data-index="0">
+                        <div class="hidden sm:block w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-cover bg-center flex-shrink-0 border border-white/20 shadow-lg" style="background-image: url('{% static 'website/img/classroom.jpg' %}');"></div>
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-primary mb-1">Welcome from the Director</p>
+                            <h2 class="text-lg sm:text-xl font-semibold mb-2">"Every child carries greatness within."</h2>
+                            <p class="text-sm sm:text-base text-gray-100/90 mb-3">
+                                At Dan-Gracious Land High School, we are passionate about raising disciplined, confident and academically excellent students prepared to impact their world.
+                            </p>
+                            <p class="text-xs sm:text-sm text-primary/90 font-medium">- The Director, Dan-Gracious Land High School</p>
+                        </div>
+                    </div>
+
+                    <!-- Slide 2: Mission, Vision, Core Values -->
+                    <div class="hero-slide hidden" data-index="1">
+                        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-primary mb-1">Our Identity</p>
+                        <h2 class="text-lg sm:text-xl font-semibold mb-3">Mission, Vision & Core Values</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs sm:text-sm">
+                            <div class="bg-white/5 rounded-xl p-3 border border-white/5">
+                                <p class="font-semibold mb-1">Vision</p>
+                                <p class="text-gray-100/90">To develop each student into a total person, equipped to fit into the larger society.</p>
+                            </div>
+                            <div class="bg-white/5 rounded-xl p-3 border border-white/5">
+                                <p class="font-semibold mb-1">Mission</p>
+                                <p class="text-gray-100/90">Providing quality education with academic excellence, aimed at the total development of the child.</p>
+                            </div>
+                            <div class="bg-white/5 rounded-xl p-3 border border-white/5">
+                                <p class="font-semibold mb-1">Core Values</p>
+                                <p class="text-gray-100/90">Discipline, integrity, excellence, fear of God, leadership and service.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Slide 3: Gallery Preview -->
+                    <div class="hero-slide hidden" data-index="2">
+                        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-primary mb-1">Campus Life</p>
+                        <h2 class="text-lg sm:text-xl font-semibold mb-3">Discover Our Vibrant Community</h2>
+                        <div class="grid grid-cols-3 gap-2 sm:gap-3 mb-3">
+                            {% for img in gallery_images|slice:":3" %}
+                            <div class="h-20 sm:h-24 rounded-xl bg-cover bg-center" style="background-image: url('{{ img.image.url }}');"></div>
+                            {% empty %}
+                            <div class="h-20 sm:h-24 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50"></div>
+                            <div class="h-20 sm:h-24 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50"></div>
+                            <div class="h-20 sm:h-24 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50"></div>
+                            {% endfor %}
+                        </div>
+                        <p class="text-xs sm:text-sm text-gray-100/90 mb-2">From engaging lessons to exciting extracurricular activities, our campus is alive with opportunities for every learner.</p>
+                        <a href="#gallery" class="inline-flex items-center text-xs sm:text-sm font-medium text-primary hover:text-secondary transition-colors">
+                            View Gallery
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+
+                    <!-- Slide 4: Blog Highlights -->
+                    <div class="hero-slide hidden" data-index="3">
+                        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-primary mb-1">From Our Blog</p>
+                        <h2 class="text-lg sm:text-xl font-semibold mb-3">Stories & Updates</h2>
+                        <div class="space-y-2 text-xs sm:text-sm">
+                            {% for p in post_highlights %}
+                            <div class="flex items-start gap-2">
+                                <span class="mt-1 h-1.5 w-1.5 rounded-full bg-primary"></span>
+                                <p><span class="font-semibold">{{ p.title }}:</span> {{ p.excerpt|default:p.content|striptags|truncatewords:14 }}</p>
+                            </div>
+                            {% empty %}
+                            <p class="text-gray-200">No posts yet.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Slide 5: Upcoming Birthdays -->
+                    <div class="hero-slide hidden" data-index="4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-primary mb-1">Upcoming Birthdays</p>
+                        <h2 class="text-lg sm:text-xl font-semibold mb-3">Celebrating Our Students</h2>
+                        <ul class="space-y-2 text-xs sm:text-sm">
+                            <li class="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2 border border-white/5">
+                                <div>
+                                    <p class="font-medium">Adebayo Michael (SS2)</p>
+                                    <p class="text-[11px] text-gray-200">22 November</p>
+                                </div>
+                                <span class="inline-flex items-center rounded-full bg-primary/20 text-primary px-2 py-0.5 text-[10px] font-semibold">
+                                    <i class="fas fa-birthday-cake mr-1"></i> Tomorrow
+                                </span>
+                            </li>
+                            <li class="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2 border border-white/5">
+                                <div>
+                                    <p class="font-medium">Okafor Chidinma (JSS3)</p>
+                                    <p class="text-[11px] text-gray-200">25 November</p>
+                                </div>
+                                <span class="inline-flex items-center rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[10px] font-semibold">In 3 days</span>
+                            </li>
+                            <li class="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2 border border-white/5">
+                                <div>
+                                    <p class="font-medium">Hassan Fatima (JSS1)</p>
+                                    <p class="text-[11px] text-gray-200">28 November</p>
+                                </div>
+                                <span class="inline-flex items-center rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[10px] font-semibold">This week</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Carousel Controls -->
+                <div class="flex items-center justify-between px-5 pb-4 border-t border-white/5 text-xs sm:text-sm">
+                    <div class="flex items-center space-x-2">
+                        <button id="hero-prev" class="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 text-gray-100 hover:bg-white/10 focus:outline-none">
+                            <i class="fas fa-chevron-left text-[10px]"></i>
+                        </button>
+                        <button id="hero-next" class="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 text-gray-100 hover:bg-white/10 focus:outline-none">
+                            <i class="fas fa-chevron-right text-[10px]"></i>
+                        </button>
+                    </div>
+                    <div class="flex items-center space-x-1" id="hero-dots">
+                        <button class="h-1.5 w-4 rounded-full bg-primary"></button>
+                        <button class="h-1.5 w-1.5 rounded-full bg-white/30"></button>
+                        <button class="h-1.5 w-1.5 rounded-full bg-white/30"></button>
+                        <button class="h-1.5 w-1.5 rounded-full bg-white/30"></button>
+                        <button class="h-1.5 w-1.5 rounded-full bg-white/30"></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Call to action buttons -->
+            <div class="mt-6 flex flex-wrap gap-3">
+                <a href="{% url 'website:admissions' %}" class="inline-flex items-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-gray-900 shadow hover:bg-secondary transition-colors">
+                    <i class="fas fa-user-plus mr-2"></i>
+                    Start Admission Process
+                </a>
+                <a href="{% url 'website:about' %}" class="inline-flex items-center rounded-full border border-white/30 px-6 py-2.5 text-sm font-semibold text-white hover:bg-white/10">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Learn More About Us
+                </a>
+            </div>
+        </div>
+
+        <!-- Right Side Stats / Highlights -->
+        <div class="w-full lg:w-2/5">
+            <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-4">
+                <div class="rounded-2xl bg-white/5 border border-white/10 p-4 text-center">
+                    <p class="text-xs text-gray-200 mb-1">WAEC/NECO</p>
+                    <p class="text-2xl font-extrabold text-primary">98%</p>
+                    <p class="text-[11px] text-gray-300">Average pass rate</p>
+                </div>
+                <div class="rounded-2xl bg-white/5 border border-white/10 p-4 text-center">
+                    <p class="text-xs text-gray-200 mb-1">Students</p>
+                    <p class="text-2xl font-extrabold text-primary">500+</p>
+                    <p class="text-[11px] text-gray-300">Across JSS & SSS</p>
+                </div>
+                <div class="rounded-2xl bg-white/5 border border-white/10 p-4 text-center">
+                    <p class="text-xs text-gray-200 mb-1">Clubs</p>
+                    <p class="text-2xl font-extrabold text-primary">15+</p>
+                    <p class="text-[11px] text-gray-300">Sports & societies</p>
+                </div>
+                <div class="rounded-2xl bg-white/5 border border-white/10 p-4 text-center">
+                    <p class="text-xs text-gray-200 mb-1">Founded</p>
+                    <p class="text-2xl font-extrabold text-primary">2013</p>
+                    <p class="text-[11px] text-gray-300">Over a decade of impact</p>
+                </div>
+            </div>
+
+            <div class="rounded-2xl bg-white text-gray-900 p-4 sm:p-5 shadow-xl">
+                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-primary mb-1">Upcoming Event</p>
+                <h3 class="text-sm sm:text-base font-semibold mb-1">Open Day & Entrance Examination</h3>
+                <p class="text-xs sm:text-sm text-gray-600 mb-3">Prospective parents and students are invited to tour our facilities and sit for the 2025/2026 entrance exams.</p>
+                <div class="flex items-center justify-between text-[11px] sm:text-xs">
+                    <div class="flex items-center space-x-2">
+                        <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary"><i class="fas fa-calendar-alt text-[10px]"></i></span>
+                        <div>
+                            <p class="font-medium">Saturday, 15th March</p>
+                            <p class="text-gray-500">9:00 AM - 1:00 PM</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'website:admissions' %}" class="inline-flex items-center text-primary hover:text-secondary font-semibold">
+                        Learn more
+                        <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Value Proposition -->
+<section class="py-14 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-center text-2xl sm:text-3xl font-bold text-gray-900 mb-8">Why Families Choose Dan-Gracious Land</h2>
+        <div class="grid gap-6 md:grid-cols-3">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md hover:-translate-y-0.5 transition-all">
+                <div class="mb-4 text-primary text-3xl">
+                    <i class="fas fa-book-reader"></i>
+                </div>
+                <h3 class="text-lg font-semibold mb-2">Academic Excellence</h3>
+                <p class="text-sm text-gray-600">We maintain a strong culture of high performance in external examinations while supporting every learner to reach their full potential.</p>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md hover:-translate-y-0.5 transition-all">
+                <div class="mb-4 text-primary text-3xl">
+                    <i class="fas fa-child"></i>
+                </div>
+                <h3 class="text-lg font-semibold mb-2">Total Development</h3>
+                <p class="text-sm text-gray-600">We provide spiritual, moral, physical and leadership training through mentoring, clubs, societies and well-structured co-curricular activities.</p>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md hover:-translate-y-0.5 transition-all">
+                <div class="mb-4 text-primary text-3xl">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="text-lg font-semibold mb-2">Strong Partnership</h3>
+                <p class="text-sm text-gray-600">We work closely with parents and guardians to guide each child, ensuring consistent feedback through our digital portal and regular engagements.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Gallery Section (anchor for hero link) -->
+<section id="gallery" class="py-14 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-6">
+            <div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">Campus Gallery</h2>
+                <p class="mt-1 text-sm text-gray-600">A glimpse into learning, friendship and achievement at DGLHS.</p>
+            </div>
+        </div>
+        <!-- Mobile slider -->
+        <div class="relative group sm:hidden">
+            <div id="gallery-track" class="flex transition-transform duration-700 ease-out will-change-transform">
+                {% for img in gallery_images %}
+                <div class="min-w-full p-1">
+                    <div class="rounded-2xl overflow-hidden shadow-sm">
+                        <img src="{{ img.image.url }}" alt="{{ img.caption }}" data-gallery-index="{{ forloop.counter0 }}" class="h-72 w-full object-cover cursor-zoom-in">
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <!-- Controls -->
+            <button id="gallery-prev" class="absolute left-2 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 text-gray-700 shadow hover:bg-white"> 
+                <i class="fas fa-chevron-left text-xs"></i>
+            </button>
+            <button id="gallery-next" class="absolute right-2 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 text-gray-700 shadow hover:bg-white"> 
+                <i class="fas fa-chevron-right text-xs"></i>
+            </button>
+        </div>
+
+        <!-- Desktop grid -->
+        <div class="hidden sm:grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {% for img in gallery_images %}
+            <div class="rounded-2xl overflow-hidden shadow-sm">
+                <img src="{{ img.image.url }}" alt="{{ img.caption }}" data-gallery-index="{{ forloop.counter0 }}" class="h-40 md:h-48 lg:h-56 w-full object-cover cursor-zoom-in">
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Lightbox modal -->
+        <div id="gallery-modal" class="fixed inset-0 z-50 hidden">
+            <div id="gallery-overlay" class="absolute inset-0 bg-black/80"></div>
+            <div class="relative h-full w-full flex items-center justify-center px-4">
+                <button id="gallery-close" class="absolute top-4 right-4 h-10 w-10 inline-flex items-center justify-center rounded-full bg-white/90 text-gray-800 shadow hover:bg-white">
+                    <i class="fas fa-times"></i>
+                </button>
+                <button id="gallery-modal-prev" class="absolute left-3 md:left-6 h-10 w-10 md:h-12 md:w-12 inline-flex items-center justify-center rounded-full bg-white/90 text-gray-800 shadow hover:bg-white">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <figure class="max-w-6xl w-full">
+                    <img id="gallery-modal-img" src="" alt="" class="w-full max-h-[80vh] object-contain rounded-2xl shadow-lg">
+                    <figcaption id="gallery-modal-caption" class="mt-3 text-center text-sm text-white/90"></figcaption>
+                </figure>
+                <button id="gallery-modal-next" class="absolute right-3 md:right-6 h-10 w-10 md:h-12 md:w-12 inline-flex items-center justify-center rounded-full bg-white/90 text-gray-800 shadow hover:bg-white">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Blog & Updates -->
+<section class="py-14 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+            <div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">News & Highlights</h2>
+                <p class="mt-1 text-sm text-gray-600">Stay informed with the latest happenings in our school community.</p>
+            </div>
+        </div>
+        <div class="grid gap-6 md:grid-cols-3">
+            {% for post in posts %}
+            <article class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+                {% if post.cover_image %}
+                <div class="h-40 bg-cover bg-center" style="background-image: url('{{ post.cover_image.url }}');"></div>
+                {% else %}
+                <div class="h-40 bg-gradient-to-r from-gray-100 to-gray-50"></div>
+                {% endif %}
+                <div class="p-5 flex-1 flex flex-col">
+                    <p class="text-[11px] uppercase tracking-[0.18em] text-primary mb-1">Update</p>
+                    <h3 class="text-sm font-semibold mb-2">{{ post.title }}</h3>
+                    <p class="text-xs text-gray-600 mb-3 flex-1">{{ post.excerpt|default:post.content|striptags|truncatewords:22 }}</p>
+                    <p class="text-[11px] text-gray-400">{{ post.created_at|date:'M d, Y' }}</p>
+                </div>
+            </article>
+            {% empty %}
+            <p class="text-sm text-gray-600">No posts yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter -->
+<section class="py-14 bg-gradient-to-r from-darker via-dark to-gray-900 text-white">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-2xl sm:text-3xl font-bold mb-3">Stay Updated</h2>
+        <p class="text-sm sm:text-base text-gray-200 mb-6">Subscribe to receive important announcements, term dates, and highlights from Dan-Gracious Land High School.</p>
+        <form method="post" action="{% url 'website:newsletter_subscribe' %}" class="flex flex-col sm:flex-row gap-3 justify-center">
+            {% csrf_token %}
+            <input name="name" type="text" class="w-full sm:w-56 rounded-full border border-white/20 bg-white/5 px-4 py-2.5 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Your name (optional)">
+            <input name="email" required type="email" class="w-full sm:w-72 rounded-full border border-white/20 bg-white/5 px-4 py-2.5 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Enter your email address">
+            <button type="submit" class="inline-flex justify-center items-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-gray-900 shadow hover:bg-secondary transition-colors">
+                Subscribe
+            </button>
+        </form>
+    </div>
+</section>
+
+<script>
+    // Simple hero carousel logic (no external JS dependency)
+    (function() {
+        const slides = Array.from(document.querySelectorAll('.hero-slide'));
+        const dotsContainer = document.getElementById('hero-dots');
+        const prevBtn = document.getElementById('hero-prev');
+        const nextBtn = document.getElementById('hero-next');
+        if (!slides.length || !dotsContainer || !prevBtn || !nextBtn) return;
+
+        let current = 0;
+        const total = slides.length;
+        const dots = Array.from(dotsContainer.children);
+
+        function updateSlides(index) {
+            slides.forEach((slide, i) => {
+                if (i === index) {
+                    slide.classList.remove('hidden');
+                } else {
+                    slide.classList.add('hidden');
+                }
+            });
+
+            dots.forEach((dot, i) => {
+                if (i === index) {
+                    dot.classList.remove('w-1.5', 'bg-white/30');
+                    dot.classList.add('w-4', 'bg-primary');
+                } else {
+                    dot.classList.remove('w-4', 'bg-primary');
+                    dot.classList.add('w-1.5', 'bg-white/30');
+                }
+            });
+        }
+
+        function goNext() {
+            current = (current + 1) % total;
+            updateSlides(current);
+        }
+
+        function goPrev() {
+            current = (current - 1 + total) % total;
+            updateSlides(current);
+        }
+
+        nextBtn.addEventListener('click', goNext);
+        prevBtn.addEventListener('click', goPrev);
+
+        dots.forEach((dot, i) => {
+            dot.addEventListener('click', () => {
+                current = i;
+                updateSlides(current);
+            });
+        });
+
+        // Auto-rotate every 8 seconds
+        let interval = setInterval(goNext, 8000);
+
+        [nextBtn, prevBtn, ...dots].forEach(el => {
+            el.addEventListener('mouseenter', () => clearInterval(interval));
+            el.addEventListener('mouseleave', () => {
+                interval = setInterval(goNext, 8000);
+            });
+        });
+
+        updateSlides(current);
+    })();
+
+    // Gallery slider (auto + controls)
+    (function() {
+        const track = document.getElementById('gallery-track');
+        if (!track) return;
+        const container = track.parentElement;
+        const slides = Array.from(track.children);
+        if (!slides.length) return;
+        let index = 0;
+        function goTo(i) {
+            index = (i + slides.length) % slides.length;
+            const width = container.clientWidth;
+            track.style.transform = `translateX(${-index * width}px)`;
+        }
+        function next() { goTo(index + 1); }
+        function prev() { goTo(index - 1); }
+        const nextBtn = document.getElementById('gallery-next');
+        const prevBtn = document.getElementById('gallery-prev');
+        nextBtn && nextBtn.addEventListener('click', next);
+        prevBtn && prevBtn.addEventListener('click', prev);
+        let timer = setInterval(next, 5000);
+        [nextBtn, prevBtn, track].forEach(el => el && el.addEventListener('mouseenter', () => clearInterval(timer)));
+        [nextBtn, prevBtn, track].forEach(el => el && el.addEventListener('mouseleave', () => timer = setInterval(next, 5000)));
+        window.addEventListener('resize', () => goTo(index));
+        goTo(0);
+    })();
+
+    // Lightbox modal for gallery (mobile slider + desktop grid)
+    (function() {
+        const thumbs = Array.from(document.querySelectorAll('[data-gallery-index]'));
+        if (!thumbs.length) return;
+        const map = new Map();
+        thumbs.forEach(el => { if (!map.has(el.src)) map.set(el.src, {src: el.src, caption: el.alt || ''}); });
+        const items = Array.from(map.values());
+        const modal = document.getElementById('gallery-modal');
+        const modalImg = document.getElementById('gallery-modal-img');
+        const modalCaption = document.getElementById('gallery-modal-caption');
+        const btnClose = document.getElementById('gallery-close');
+        const btnPrev = document.getElementById('gallery-modal-prev');
+        const btnNext = document.getElementById('gallery-modal-next');
+        const overlay = document.getElementById('gallery-overlay');
+        let current = 0;
+        function show(i) {
+            current = (i + items.length) % items.length;
+            const it = items[current];
+            modalImg.src = it.src;
+            modalImg.alt = it.caption || '';
+            modalCaption.textContent = it.caption || '';
+            modal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+        function hide() {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+        thumbs.forEach(el => {
+            el.addEventListener('click', () => {
+                const idx = items.findIndex(it => it.src === el.src);
+                show(idx >= 0 ? idx : 0);
+            });
+        });
+        btnClose && btnClose.addEventListener('click', hide);
+        overlay && overlay.addEventListener('click', hide);
+        btnPrev && btnPrev.addEventListener('click', () => show(current - 1));
+        btnNext && btnNext.addEventListener('click', () => show(current + 1));
+        window.addEventListener('keydown', (e) => {
+            if (modal.classList.contains('hidden')) return;
+            if (e.key === 'Escape') hide();
+            if (e.key === 'ArrowLeft') show(current - 1);
+            if (e.key === 'ArrowRight') show(current + 1);
+        });
+    })();
+</script>
+{% endblock %}

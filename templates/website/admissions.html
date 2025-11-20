@@ -1,0 +1,109 @@
+{% extends 'website/base.html' %}
+
+{% block title %}Admissions - Dan-Gracious Land High School{% endblock %}
+
+{% block content %}
+<section class="py-14 bg-white">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-center text-3xl sm:text-4xl font-bold text-gray-900 mb-10">Admissions</h1>
+
+        <!-- Process -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-semibold text-gray-900 mb-4">How to Apply</h2>
+            <ol class="space-y-4 border-l-2 border-primary/40 pl-4 text-sm text-gray-700">
+                <li class="relative">
+                    <span class="absolute -left-2 top-1 h-3 w-3 rounded-full bg-primary"></span>
+                    <h3 class="font-semibold">Step 1: Purchase Application Form</h3>
+                    <p class="text-gray-600">Visit the school administrative office to obtain the admission form for your child.</p>
+                </li>
+                <li class="relative">
+                    <span class="absolute -left-2 top-1 h-3 w-3 rounded-full bg-primary"></span>
+                    <h3 class="font-semibold">Step 2: Submit Documents</h3>
+                    <p class="text-gray-600">Return the completed form with all required documents (Birth Certificate, previous results, passport photographs, etc.).</p>
+                </li>
+                <li class="relative">
+                    <span class="absolute -left-2 top-1 h-3 w-3 rounded-full bg-primary"></span>
+                    <h3 class="font-semibold">Step 3: Entrance Examination</h3>
+                    <p class="text-gray-600">Your child will sit for an entrance examination on the scheduled date to assess readiness for admission.</p>
+                </li>
+                <li class="relative">
+                    <span class="absolute -left-2 top-1 h-3 w-3 rounded-full bg-primary"></span>
+                    <h3 class="font-semibold">Step 4: Interview &amp; Admission</h3>
+                    <p class="text-gray-600">Successful candidates are invited for an interview, after which admission letters are issued.</p>
+                </li>
+            </ol>
+        </div>
+
+        <!-- Fees -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-semibold text-gray-900 mb-3">Tuition &amp; Fees</h2>
+            <p class="text-sm text-gray-600 mb-4">We strive to make quality child education affordable. For a detailed breakdown of tuition and fees for the current academic session, kindly contact our accounts department or download the fee schedule.</p>
+            <a href="#" class="inline-flex items-center rounded-full border border-primary px-4 py-2 text-sm font-semibold text-primary hover:bg-primary hover:text-gray-900 transition-colors">
+                <i class="fas fa-file-pdf mr-2"></i>
+                Download Fee Schedule (PDF)
+            </a>
+        </div>
+
+        <!-- Forms -->
+        <div class="mb-12 grid gap-8 md:grid-cols-2">
+            <div class="bg-gray-50 rounded-2xl border border-gray-100 p-5">
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">Downloadable Forms</h3>
+                <ul class="space-y-2 text-sm text-gray-700">
+                    {% for f in forms %}
+                    <li class="flex items-center justify-between rounded-xl bg-white border border-gray-100 px-3 py-2">
+                        <div>
+                            <span class="font-medium">{{ f.title }}</span>
+                            {% if f.description %}<p class="text-xs text-gray-500">{{ f.description }}</p>{% endif %}
+                        </div>
+                        <a href="{{ f.document.url }}" download class="inline-flex items-center rounded-full bg-primary px-3 py-1 text-xs font-semibold text-gray-900 hover:bg-secondary">
+                            <i class="fas fa-download mr-1"></i>
+                            Download
+                        </a>
+                    </li>
+                    {% empty %}
+                    <li class="text-sm text-gray-500">No forms available yet.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="bg-gray-50 rounded-2xl border border-gray-100 p-5">
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">Online Inquiry</h3>
+                <form method="post" action="{% url 'website:admissions_inquiry' %}" class="space-y-3 text-sm">
+                    {% csrf_token %}
+                    <div>
+                        <input name="name" required type="text" class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Your Name">
+                    </div>
+                    <div>
+                        <input name="email" required type="email" class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Your Email">
+                    </div>
+                    <div>
+                        <textarea name="message" required rows="3" class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Your Message"></textarea>
+                    </div>
+                    <button type="submit" class="inline-flex items-center rounded-full bg-primary px-5 py-2 text-sm font-semibold text-gray-900 hover:bg-secondary">
+                        Send Inquiry
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- FAQ -->
+        <div>
+            <h2 class="text-center text-2xl font-semibold text-gray-900 mb-5">Frequently Asked Questions</h2>
+            <div class="space-y-3 text-sm">
+                {% for q in faqs %}
+                <details class="group rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                    <summary class="flex cursor-pointer list-none items-center justify-between">
+                        <span class="font-semibold text-gray-900">{{ q.question }}</span>
+                        <span class="ml-3 flex h-6 w-6 items-center justify-center rounded-full bg-white text-gray-600 group-open:rotate-180 transition-transform">
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </span>
+                    </summary>
+                    <div class="mt-2 text-gray-700 prose prose-sm max-w-none">{{ q.answer|safe }}</div>
+                </details>
+                {% empty %}
+                <p class="text-sm text-gray-500">No FAQs yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

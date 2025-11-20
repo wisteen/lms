@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load core_extras %}
+
+{% block title %}Class Broadsheet - {{ class_name }}{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow p-6">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900">Class Broadsheet</h2>
+            <p class="text-gray-600">{{ class_name }} - {{ term.name }}</p>
+        </div>
+        <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            Print Broadsheet
+        </button>
+    </div>
+
+    {% if broadsheet_data %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Student</th>
+                        {% for subject in subjects %}
+                        <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">{{ subject.code }}</th>
+                        {% endfor %}
+                        <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Average</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for data in broadsheet_data %}
+                    <tr>
+                        <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {{ data.student.user.get_full_name }}
+                            <br><span class="text-xs text-gray-500">{{ data.student.student_id }}</span>
+                        </td>
+                        {% for subject in subjects %}
+                        <td class="px-3 py-2 whitespace-nowrap text-center text-sm">
+                            {% if data.results|lookup:subject.code %}
+                                <div class="text-gray-900">{{ data.results|lookup:subject.code.total }}</div>
+                                <div class="text-xs text-gray-500">{{ data.results|lookup:subject.code.grade }}</div>
+                            {% else %}
+                                <div class="text-gray-400">-</div>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                        <td class="px-3 py-2 whitespace-nowrap text-center text-sm font-medium">
+                            <div class="text-gray-900">{{ data.average }}%</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-gray-500">No student data available for this class.</p>
+    {% endif %}
+
+    <div class="mt-6">
+        <a href="{% url 'dashboard' %}" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+            Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<style>
+@media print {
+    .no-print { display: none !important; }
+    body { font-size: 12px; }
+    table { font-size: 10px; }
+}
+</style>
+{% endblock %}
