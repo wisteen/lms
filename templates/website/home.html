@@ -246,12 +246,12 @@
             </div>
         </div>
         <!-- Mobile slider -->
-        <div class="relative group sm:hidden">
+        <div class="relative group sm:hidden overflow-hidden">
             <div id="gallery-track" class="flex transition-transform duration-700 ease-out will-change-transform">
                 {% for img in gallery_images %}
-                <div class="min-w-full p-1">
+                <div class="min-w-full flex-shrink-0 px-1">
                     <div class="rounded-2xl overflow-hidden shadow-sm">
-                        <img src="{{ img.image.url }}" alt="{{ img.caption }}" data-gallery-index="{{ forloop.counter0 }}" class="h-72 w-full object-cover cursor-zoom-in">
+                        <img src="{{ img.image.url }}" alt="{{ img.caption }}" data-gallery-index="{{ forloop.counter0 }}" class="h-64 w-full object-cover cursor-zoom-in">
                     </div>
                 </div>
                 {% endfor %}
