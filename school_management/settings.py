@@ -8,6 +8,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+CSRF_TRUSTED_ORIGINS = ['https://lms-2ewb.onrender.com']
+
 INSTALLED_APPS = [
     'jazzmin',
     'django.contrib.admin',
