@@ -1,16 +1,43 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.views.decorators.http import require_POST
+from django.utils import timezone
+from datetime import timedelta
 from .models import NewsPost, GalleryImage, NewsletterSubscriber
+from core.models import Student, Teacher
 
 def home(request):
     posts = NewsPost.objects.filter(published=True)[:3]
     post_highlights = posts[:3]
     gallery_images = list(GalleryImage.objects.all()[:12])
+    
+    # Get upcoming birthdays from students
+    today = timezone.now().date()
+    upcoming_birthdays = []
+    
+    students = Student.objects.select_related('user', 'school_class').all()
+    for student in students:
+        if student.date_of_birth:
+            birthday_this_year = student.date_of_birth.replace(year=today.year)
+            if birthday_this_year < today:
+                birthday_this_year = birthday_this_year.replace(year=today.year + 1)
+            days_until = (birthday_this_year - today).days
+            if 0 <= days_until <= 30:
+                upcoming_birthdays.append({
+                    'name': student.user.get_full_name(),
+                    'date': birthday_this_year,
+                    'days_until': days_until,
+                    'class': student.school_class.name
+                })
+    
+    upcoming_birthdays.sort(key=lambda x: x['days_until'])
+    upcoming_birthdays = upcoming_birthdays[:5]
+    
     return render(request, 'website/home.html', {
         'posts': posts,
         'post_highlights': post_highlights,
         'gallery_images': gallery_images,
+        'upcoming_birthdays': upcoming_birthdays,
     })
 
 def about(request):
@@ -40,7 +67,6 @@ def admissions_inquiry(request):
         return redirect('website:admissions')
     from .models import Inquiry
     Inquiry.objects.create(name=name, email=email, message=message)
-    # Notify admins if configured
     try:
         mail_admins(subject='New Admissions Inquiry', message=f'From: {name} <{email}>\n\n{message}', fail_silently=True)
     except Exception:

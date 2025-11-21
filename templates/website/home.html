@@ -27,7 +27,7 @@
                 <div class="p-5 sm:p-6 lg:p-7 min-h-[210px]">
                     <!-- Slide 1: Director's Welcome -->
                     <div class="hero-slide flex gap-4 sm:gap-6" data-index="0">
-                        <div class="hidden sm:block w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-cover bg-center flex-shrink-0 border border-white/20 shadow-lg" style="background-image: url('{% static 'website/img/classroom.jpg' %}');"></div>
+                        <div class="hidden sm:block w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-cover bg-center flex-shrink-0 border border-white/20 shadow-lg" style="background-image: url('{% static 'img/director.jpg' %}');"></div>
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-[0.22em] text-primary mb-1">Welcome from the Director</p>
                             <h2 class="text-lg sm:text-xl font-semibold mb-2">"Every child carries greatness within."</h2>
@@ -97,31 +97,27 @@
                     <!-- Slide 5: Upcoming Birthdays -->
                     <div class="hero-slide hidden" data-index="4">
                         <p class="text-xs font-semibold uppercase tracking-[0.22em] text-primary mb-1">Upcoming Birthdays</p>
-                        <h2 class="text-lg sm:text-xl font-semibold mb-3">Celebrating Our Students</h2>
+                        <h2 class="text-lg sm:text-xl font-semibold mb-3">Celebrating Our Community</h2>
                         <ul class="space-y-2 text-xs sm:text-sm">
+                            {% for birthday in upcoming_birthdays %}
                             <li class="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2 border border-white/5">
                                 <div>
-                                    <p class="font-medium">Adebayo Michael (SS2)</p>
-                                    <p class="text-[11px] text-gray-200">22 November</p>
+                                    <p class="font-medium">{{ birthday.name }}{% if birthday.class %} ({{ birthday.class }}){% endif %}</p>
+                                    <p class="text-[11px] text-gray-200">{{ birthday.date|date:"d M" }}</p>
                                 </div>
                                 <span class="inline-flex items-center rounded-full bg-primary/20 text-primary px-2 py-0.5 text-[10px] font-semibold">
-                                    <i class="fas fa-birthday-cake mr-1"></i> Tomorrow
+                                    {% if birthday.days_until == 0 %}
+                                        <i class="fas fa-birthday-cake mr-1"></i> Today
+                                    {% elif birthday.days_until == 1 %}
+                                        <i class="fas fa-birthday-cake mr-1"></i> Tomorrow
+                                    {% else %}
+                                        In {{ birthday.days_until }} days
+                                    {% endif %}
                                 </span>
                             </li>
-                            <li class="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2 border border-white/5">
-                                <div>
-                                    <p class="font-medium">Okafor Chidinma (JSS3)</p>
-                                    <p class="text-[11px] text-gray-200">25 November</p>
-                                </div>
-                                <span class="inline-flex items-center rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[10px] font-semibold">In 3 days</span>
-                            </li>
-                            <li class="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2 border border-white/5">
-                                <div>
-                                    <p class="font-medium">Hassan Fatima (JSS1)</p>
-                                    <p class="text-[11px] text-gray-200">28 November</p>
-                                </div>
-                                <span class="inline-flex items-center rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[10px] font-semibold">This week</span>
-                            </li>
+                            {% empty %}
+                            <li class="text-gray-300 text-center py-4">No upcoming birthdays in the next 30 days</li>
+                            {% endfor %}
                         </ul>
                     </div>
                 </div>
