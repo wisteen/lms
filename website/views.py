@@ -55,6 +55,9 @@ def admissions(request):
 def academics(request):
     return render(request, 'website/academics.html')
 
+def school_fees(request):
+    return render(request, 'website/school_fees.html')
+
 @require_POST
 def admissions_inquiry(request):
     from django.conf import settings
