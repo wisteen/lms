@@ -26,6 +26,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -85,8 +86,13 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+WHITENOISE_AUTOREFRESH = True
+WHITENOISE_USE_FINDERS = True
 
 CKEDITOR_UPLOAD_PATH = 'uploads/'
 CKEDITOR_CONFIGS = {
@@ -109,10 +115,10 @@ JAZZMIN_SETTINGS = {
     'site_logo_classes': 'img-circle',
     'welcome_sign': 'Welcome to Dan-Gracious Land High School Admin',
     'copyright': 'Dan-Gracious Land High School',
-    'search_model': ['auth.User', 'core.Student', 'core.Teacher', 'core.Subject', 'core.SchoolClass'],
+    'search_model': ['core.User', 'core.Student', 'core.Teacher', 'core.Subject', 'core.SchoolClass'],
     'topmenu_links': [
-        {'name': 'Admin Home', 'url': 'admin:index', 'permissions': ['auth.view_user']},
-        {'name': 'Generate Tokens', 'url': 'generate_tokens', 'permissions': ['auth.view_user']},
+        {'name': 'Admin Home', 'url': 'admin:index', 'permissions': ['core.view_user']},
+        {'name': 'Generate Tokens', 'url': 'generate_tokens', 'permissions': ['core.view_user']},
     ],
     'show_sidebar': True,
     'navigation_expanded': True,

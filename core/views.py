@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.utils import timezone
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, Sum
 from .models import *
 
 def login_view(request):
@@ -1026,23 +1026,56 @@ def generate_tokens(request):
     if request.method == 'POST':
         term_id = request.POST.get('term_id')
         max_uses = int(request.POST.get('max_uses', 3))
+        individual = request.POST.get('individual')
         
         term = Term.objects.get(id=term_id)
-        students = Student.objects.all()
         
-        for student in students:
-            ResultToken.objects.get_or_create(
-                student=student,
-                term=term,
-                defaults={'max_uses': max_uses}
-            )
+        if individual:
+            student_id = request.POST.get('student_id')
+            student = Student.objects.get(id=student_id)
+            action = request.POST.get('action', 'create')
+            
+            if action == 'regenerate':
+                ResultToken.objects.filter(student=student, term=term).delete()
+                token = ResultToken.objects.create(student=student, term=term, max_uses=max_uses)
+                messages.success(request, f'New token regenerated for {student.user.get_full_name()}')
+            else:
+                token, created = ResultToken.objects.get_or_create(
+                    student=student,
+                    term=term,
+                    defaults={'max_uses': max_uses}
+                )
+                if created:
+                    messages.success(request, f'Token generated for {student.user.get_full_name()}')
+                else:
+                    messages.warning(request, f'Token already exists for {student.user.get_full_name()} - use Regenerate to create new token')
+        else:
+            students = Student.objects.all()
+            action = request.POST.get('action', 'create')
+            
+            if action == 'regenerate':
+                ResultToken.objects.filter(term=term).delete()
+                for student in students:
+                    ResultToken.objects.create(student=student, term=term, max_uses=max_uses)
+                messages.success(request, f'All tokens regenerated for {students.count()} students')
+            else:
+                created_count = 0
+                for student in students:
+                    _, created = ResultToken.objects.get_or_create(
+                        student=student,
+                        term=term,
+                        defaults={'max_uses': max_uses}
+                    )
+                    if created:
+                        created_count += 1
+                messages.success(request, f'Tokens generated: {created_count} new, {students.count() - created_count} already existed')
         
-        messages.success(request, f'Tokens generated for {students.count()} students')
         return redirect('generate_tokens')
     
     terms = Term.objects.all()
+    students = Student.objects.select_related('user', 'school_class').order_by('student_id')
     tokens = ResultToken.objects.select_related('student__user', 'student__school_class', 'term').order_by('-created_at')
-    return render(request, 'admin/generate_tokens.html', {'terms': terms, 'tokens': tokens})
+    return render(request, 'admin/generate_tokens.html', {'terms': terms, 'students': students, 'tokens': tokens})
 
 def check_result(request):
     if request.method == 'POST':

@@ -99,3 +99,13 @@ class PsychomotorAdmin(admin.ModelAdmin):
 class EffectiveDomainAdmin(admin.ModelAdmin):
     list_display = ('student', 'term')
     list_filter = ('term', 'student__school_class')
+
+@admin.register(ResultToken)
+class ResultTokenAdmin(admin.ModelAdmin):
+    list_display = ('student', 'term', 'token', 'uses_count', 'max_uses', 'created_at')
+    list_filter = ('term', 'student__school_class')
+    search_fields = ('token', 'student__student_id', 'student__user__first_name', 'student__user__last_name')
+    readonly_fields = ('token', 'created_at')
+    
+    def has_add_permission(self, request):
+        return False
