@@ -48,14 +48,33 @@ class GradingSystem(models.Model):
     def __str__(self):
         return f"{self.grade} ({self.min_score}-{self.max_score})"
 
-class QuestionBank(models.Model):
+class QuestionGroup(models.Model):
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    instruction = RichTextField(help_text="Common passage/instruction for grouped questions")
+    created_by = models.ForeignKey('Teacher', on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.subject.code} - {self.instruction[:50]}"
+
+class QuestionBank(models.Model):
+    QUESTION_TYPES = [
+        ('objective', 'Objective (SCQ)'),
+        ('multichoice', 'Multi-Choice (MCQ)'),
+        ('theory', 'Theory'),
+    ]
+    
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    school_class = models.ForeignKey(SchoolClass, on_delete=models.CASCADE, null=True, blank=True)
+    question_type = models.CharField(max_length=20, choices=QUESTION_TYPES, default='objective')
+    topic = models.CharField(max_length=200, blank=True)
+    group = models.ForeignKey(QuestionGroup, on_delete=models.CASCADE, null=True, blank=True, related_name='questions')
     question_text = RichTextField()
-    option_a = RichTextField()
-    option_b = RichTextField()
-    option_c = RichTextField()
-    option_d = RichTextField()
-    correct_answer = models.CharField(max_length=1, choices=[('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')])
+    option_a = RichTextField(blank=True)
+    option_b = RichTextField(blank=True)
+    option_c = RichTextField(blank=True)
+    option_d = RichTextField(blank=True)
+    correct_answer = models.CharField(max_length=10, blank=True)
     difficulty = models.CharField(max_length=10, choices=[('easy', 'Easy'), ('medium', 'Medium'), ('hard', 'Hard')], default='medium')
     created_by = models.ForeignKey('Teacher', on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -302,6 +321,14 @@ class Quiz(models.Model):
         now = timezone.now()
         return self.status == 'live' or (self.status == 'scheduled' and self.start_time <= now <= self.end_time)
 
+class QuestionGroupInstance(models.Model):
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='question_groups')
+    instruction = RichTextField()
+    order = models.IntegerField(default=0)
+    
+    class Meta:
+        ordering = ['order']
+
 class Question(models.Model):
     QUESTION_TYPES = [
         ('objective', 'Objective'),
@@ -310,6 +337,7 @@ class Question(models.Model):
     ]
     
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
+    group_instance = models.ForeignKey(QuestionGroupInstance, on_delete=models.CASCADE, null=True, blank=True, related_name='questions')
     question_type = models.CharField(max_length=20, choices=QUESTION_TYPES, default='objective')
     question_text = RichTextField()
     option_a = RichTextField(blank=True)

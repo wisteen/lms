@@ -392,6 +392,43 @@ def delete_quiz(request, quiz_id):
     return JsonResponse({'success': False})
 
 @login_required
+def import_questions_ai(request):
+    if request.user.role != 'subject_teacher':
+        return redirect('dashboard')
+    
+    teacher = Teacher.objects.get(user=request.user)
+    
+    if request.method == 'POST':
+        text_content = request.POST.get('text_content')
+        subject_id = request.POST.get('subject_id')
+        school_class_id = request.POST.get('school_class_id') or None
+        
+        try:
+            from .ai_question_importer import AIQuestionImporter
+            importer = AIQuestionImporter()
+            
+            # Extract questions using AI
+            extracted_data = importer.extract_questions_from_text(text_content, subject_id)
+            
+            # Import to database
+            imported_count = importer.import_to_database(
+                extracted_data, 
+                subject_id, 
+                teacher, 
+                school_class_id
+            )
+            
+            messages.success(request, f'Successfully imported {imported_count} questions using AI!')
+            return redirect('question_bank')
+        except Exception as e:
+            messages.error(request, f'Import failed: {str(e)}')
+    
+    return render(request, 'teacher/import_questions_ai.html', {
+        'subjects': teacher.subjects.all(),
+        'classes': teacher.classes.all()
+    })
+
+@login_required
 def question_bank(request):
     if request.user.role != 'subject_teacher':
         return redirect('dashboard')
@@ -404,16 +441,38 @@ def question_bank(request):
         if form.is_valid():
             question = form.save(commit=False)
             question.created_by = teacher
+            
+            # Handle correct answer based on question type
+            question_type = request.POST.get('question_type')
+            if question_type == 'objective':
+                question.correct_answer = request.POST.get('correct_answer_scq', '')
+            elif question_type == 'multichoice':
+                correct_multi = request.POST.getlist('correct_multi')
+                question.correct_answer = ','.join(sorted(correct_multi))
+            
             question.save()
             messages.success(request, 'Question added to bank')
             return redirect('question_bank')
     else:
         form = QuestionBankForm()
+        form.fields['subject'].queryset = teacher.subjects.all()
+        form.fields['school_class'].queryset = teacher.classes.all()
+        form.fields['group'].queryset = QuestionGroup.objects.filter(subject__in=teacher.subjects.all())
     
-    questions = QuestionBank.objects.filter(subject__in=teacher.subjects.all())
+    # Organize questions by groups and standalone
+    groups = QuestionGroup.objects.filter(subject__in=teacher.subjects.all()).prefetch_related('questions')
+    standalone_questions = QuestionBank.objects.filter(subject__in=teacher.subjects.all(), group__isnull=True).order_by('-created_at')
+    
+    questions_data = []
+    for group in groups:
+        questions_data.append({'type': 'group', 'group': group, 'questions': group.questions.all()})
+    for question in standalone_questions:
+        questions_data.append({'type': 'question', 'question': question})
+    
     return render(request, 'teacher/question_bank.html', {
-        'questions': questions,
+        'questions_data': questions_data,
         'subjects': teacher.subjects.all(),
+        'classes': teacher.classes.all(),
         'form': form
     })
 
@@ -438,6 +497,22 @@ def upload_image(request):
     return JsonResponse({'uploaded': 0, 'error': {'message': 'Upload failed'}})
 
 @login_required
+def create_question_group(request):
+    if request.method == 'POST':
+        teacher = Teacher.objects.get(user=request.user)
+        subject_id = request.POST.get('subject')
+        instruction = request.POST.get('instruction')
+        
+        group = QuestionGroup.objects.create(
+            subject_id=subject_id,
+            instruction=instruction,
+            created_by=teacher
+        )
+        messages.success(request, 'Question group created successfully')
+        return redirect('question_bank')
+    return redirect('question_bank')
+
+@login_required
 def add_question_from_bank(request):
     if request.method == 'POST':
         import json
@@ -451,7 +526,7 @@ def add_question_from_bank(request):
             
             Question.objects.create(
                 quiz=quiz,
-                question_type='objective',
+                question_type=bank_question.question_type,
                 question_text=bank_question.question_text,
                 option_a=bank_question.option_a,
                 option_b=bank_question.option_b,
@@ -460,6 +535,45 @@ def add_question_from_bank(request):
                 correct_answer=bank_question.correct_answer,
                 max_marks=1
             )
+            
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': False})
+
+@login_required
+def add_group_from_bank(request):
+    if request.method == 'POST':
+        import json
+        try:
+            data = json.loads(request.body)
+            quiz_id = data.get('quiz_id')
+            group_id = data.get('group_id')
+            
+            quiz = Quiz.objects.get(id=quiz_id)
+            bank_group = QuestionGroup.objects.get(id=group_id)
+            
+            # Create group instance
+            group_instance = QuestionGroupInstance.objects.create(
+                quiz=quiz,
+                instruction=bank_group.instruction,
+                order=Question.objects.filter(quiz=quiz).count()
+            )
+            
+            # Add all questions from group
+            for bank_question in bank_group.questions.all():
+                Question.objects.create(
+                    quiz=quiz,
+                    group_instance=group_instance,
+                    question_type=bank_question.question_type,
+                    question_text=bank_question.question_text,
+                    option_a=bank_question.option_a,
+                    option_b=bank_question.option_b,
+                    option_c=bank_question.option_c,
+                    option_d=bank_question.option_d,
+                    correct_answer=bank_question.correct_answer,
+                    max_marks=1
+                )
             
             return JsonResponse({'success': True})
         except Exception as e:
@@ -1215,19 +1329,65 @@ def enhanced_quiz(request, quiz_id):
     if attempt.is_submitted:
         return redirect('view_quiz_result', quiz_id=quiz_id)
     
-    questions = list(quiz.questions.all())
+    # Organize questions by groups and standalone
+    question_groups = QuestionGroupInstance.objects.filter(quiz=quiz).prefetch_related('questions').order_by('order')
+    standalone_questions = quiz.questions.filter(group_instance__isnull=True).order_by('order')
     
-    # Shuffle questions if enabled
+    # Build questions_data with proper numbering
+    questions_data = []
+    question_counter = 1
+    
+    # Add groups
+    for group in question_groups:
+        group_questions = list(group.questions.all().order_by('order'))
+        # Add display_number to each question
+        for i, q in enumerate(group_questions):
+            q.display_number = question_counter + i
+        questions_data.append({
+            'type': 'group',
+            'instruction': group.instruction,
+            'questions': group_questions
+        })
+        question_counter += len(group_questions)
+    
+    # Add standalone questions
+    for question in standalone_questions:
+        questions_data.append({
+            'type': 'question',
+            'question': question,
+            'question_number': question_counter
+        })
+        question_counter += 1
+    
+    # Shuffle only if enabled (groups stay together)
     if quiz.shuffle_questions:
         import random
-        random.shuffle(questions)
+        random.shuffle(questions_data)
+        # Renumber after shuffle
+        question_counter = 1
+        for item in questions_data:
+            if item['type'] == 'group':
+                for i, q in enumerate(item['questions']):
+                    q.display_number = question_counter + i
+                question_counter += len(item['questions'])
+            else:
+                item['question_number'] = question_counter
+                question_counter += 1
+    
+    # Flatten for processing
+    all_questions = []
+    for item in questions_data:
+        if item['type'] == 'group':
+            all_questions.extend(item['questions'])
+        else:
+            all_questions.append(item['question'])
     
     if request.method == 'POST':
         # Process submission
         auto_score = 0
         total_objective_marks = 0
         
-        for question in questions:
+        for question in all_questions:
             if question.question_type == 'objective':
                 answer = request.POST.get(f'question_{question.id}')
                 if answer:
@@ -1264,8 +1424,8 @@ def enhanced_quiz(request, quiz_id):
         attempt.auto_score = auto_score
         
         # Check if all questions are auto-graded (objective/multichoice)
-        theory_questions = [q for q in questions if q.question_type == 'theory']
-        total_marks = sum(q.max_marks for q in questions)
+        theory_questions = [q for q in all_questions if q.question_type == 'theory']
+        total_marks = sum(q.max_marks for q in all_questions)
         
         if not theory_questions:
             attempt.final_score = (auto_score / total_marks * 100) if total_marks > 0 else 0
@@ -1287,6 +1447,6 @@ def enhanced_quiz(request, quiz_id):
     
     return render(request, 'student/enhanced_quiz.html', {
         'quiz': quiz,
-        'questions': questions,
+        'questions_data': questions_data,
         'attempt': attempt
     })
