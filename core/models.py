@@ -114,9 +114,27 @@ class Teacher(models.Model):
     employee_id = models.CharField(max_length=20, unique=True)
     subjects = models.ManyToManyField(Subject, blank=True)
     classes = models.ManyToManyField(SchoolClass, blank=True)
+    ai_access_expires = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.user.get_full_name()} - {self.employee_id}"
+    
+    def has_ai_access(self):
+        if not self.ai_access_expires:
+            return False
+        return timezone.now() < self.ai_access_expires
+
+class AISubscription(models.Model):
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=500.00)
+    reference = models.CharField(max_length=100, unique=True)
+    status = models.CharField(max_length=20, default='pending')
+    start_date = models.DateTimeField(null=True, blank=True)
+    end_date = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.teacher.user.get_full_name()} - {self.reference}"
 
 class ClassTeacher(models.Model):
     teacher = models.OneToOneField(Teacher, on_delete=models.CASCADE)

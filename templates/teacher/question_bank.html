@@ -6,9 +6,15 @@
         <div class="flex justify-between items-center">
             <h2 class="text-2xl font-bold">Question Bank</h2>
             <div class="space-x-2">
+                {% if teacher.has_ai_access %}
                 <a href="{% url 'import_questions_ai' %}" class="bg-purple-600 text-white px-4 py-2 rounded inline-block">
                     🤖 AI Import
                 </a>
+                {% else %}
+                <a href="{% url 'subscribe_ai' %}" class="bg-purple-600 text-white px-4 py-2 rounded inline-block">
+                    🤖 AI Import (Subscribe)
+                </a>
+                {% endif %}
                 <button onclick="document.getElementById('groupModal').classList.remove('hidden')" class="bg-green-600 text-white px-4 py-2 rounded">
                     ➕ Create Group
                 </button>

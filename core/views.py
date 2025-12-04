@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.utils import timezone
 from django.db.models import Avg, Count, Sum
+import os
 from .models import *
 
 def login_view(request):
@@ -392,11 +393,91 @@ def delete_quiz(request, quiz_id):
     return JsonResponse({'success': False})
 
 @login_required
+def subscribe_ai(request):
+    if request.user.role != 'subject_teacher':
+        return redirect('dashboard')
+    
+    teacher = Teacher.objects.get(user=request.user)
+    
+    if request.method == 'POST':
+        import secrets
+        from datetime import timedelta
+        
+        # Generate unique reference
+        reference = f"AI-{secrets.token_urlsafe(16)}"
+        
+        # Create subscription record
+        subscription = AISubscription.objects.create(
+            teacher=teacher,
+            reference=reference,
+            amount=500.00
+        )
+        
+        # Return Paystack payment data
+        return render(request, 'teacher/paystack_payment.html', {
+            'reference': reference,
+            'amount': 50000,  # 500 Naira in kobo
+            'email': teacher.user.email,
+            'paystack_public_key': os.getenv('PAYSTACK_PUBLIC_KEY', 'pk_test_c1042d5f25e8d7b4c091d419a1d9262589200499')
+        })
+    
+    return render(request, 'teacher/subscribe_ai.html', {
+        'teacher': teacher,
+        'has_access': teacher.has_ai_access(),
+        'expires': teacher.ai_access_expires
+    })
+
+@login_required
+def verify_payment(request):
+    if request.user.role != 'subject_teacher':
+        return redirect('dashboard')
+    
+    reference = request.GET.get('reference')
+    teacher = Teacher.objects.get(user=request.user)
+    
+    try:
+        import requests
+        from datetime import timedelta
+        
+        # Verify payment with Paystack
+        headers = {
+            'Authorization': f"Bearer {os.getenv('PAYSTACK_SECRET_KEY', 'sk_test_c50b47becfd4313423586237510e6dfbeb484190')}"
+        }
+        response = requests.get(f'https://api.paystack.co/transaction/verify/{reference}', headers=headers)
+        data = response.json()
+        
+        if data['status'] and data['data']['status'] == 'success':
+            # Update subscription
+            subscription = AISubscription.objects.get(reference=reference)
+            subscription.status = 'success'
+            subscription.start_date = timezone.now()
+            subscription.end_date = timezone.now() + timedelta(days=7)
+            subscription.save()
+            
+            # Grant AI access
+            teacher.ai_access_expires = subscription.end_date
+            teacher.save()
+            
+            messages.success(request, 'Payment successful! AI Import access granted for 7 days.')
+            return redirect('import_questions_ai')
+        else:
+            messages.error(request, 'Payment verification failed.')
+    except Exception as e:
+        messages.error(request, f'Error: {str(e)}')
+    
+    return redirect('subscribe_ai')
+
+@login_required
 def import_questions_ai(request):
     if request.user.role != 'subject_teacher':
         return redirect('dashboard')
     
     teacher = Teacher.objects.get(user=request.user)
+    
+    # Check AI access
+    if not teacher.has_ai_access():
+        messages.warning(request, 'AI Import access expired. Please subscribe to continue.')
+        return redirect('subscribe_ai')
     
     if request.method == 'POST':
         text_content = request.POST.get('text_content')
@@ -473,6 +554,7 @@ def question_bank(request):
         'questions_data': questions_data,
         'subjects': teacher.subjects.all(),
         'classes': teacher.classes.all(),
+        'teacher': teacher,
         'form': form
     })
 
