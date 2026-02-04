@@ -3,305 +3,257 @@
 
 {% block title %}{{ action }} Curriculum{% endblock %}
 
-{% block extra_css %}
-<style>
-.formset-form {
-    border: 1px solid #dee2e6;
-    border-radius: 0.375rem;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    background-color: #f8f9fa;
-}
-.formset-form.to-delete {
-    opacity: 0.5;
-    background-color: #f8d7da;
-}
-.add-form-btn {
-    background-color: #28a745;
-    border-color: #28a745;
-}
-.delete-form-btn {
-    background-color: #dc3545;
-    border-color: #dc3545;
-}
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">{{ action }} Curriculum</h3>
-                    <div class="card-tools">
-                        <a href="{% if curriculum %}{% url 'academic:curriculum_detail' curriculum.id %}{% else %}{% url 'academic:curriculum_list' %}{% endif %}" 
-                           class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Cancel
-                        </a>
-                    </div>
+<div class="max-w-7xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg">
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h3 class="text-2xl font-bold text-gray-900">{{ action }} Curriculum</h3>
+            <a href="{% if curriculum %}{% url 'academic:curriculum_detail' curriculum.id %}{% else %}{% url 'academic:curriculum_list' %}{% endif %}" 
+               class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg inline-flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i> Cancel
+            </a>
+        </div>
+        
+        <form method="post" class="p-6">
+            {% csrf_token %}
+            
+            <!-- Basic Information -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.title.label }}</label>
+                    <input type="text" name="{{ form.title.name }}" value="{{ form.title.value|default:'' }}" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    {% if form.title.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.title.errors.0 }}</p>
+                    {% endif %}
                 </div>
-                
-                <form method="post" class="card-body">
-                    {% csrf_token %}
-                    
-                    <!-- Basic Information -->
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="form-group">
-                                <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.academic_year.label }}</label>
+                    <input type="text" name="{{ form.academic_year.name }}" value="{{ form.academic_year.value|default:'' }}" 
+                           placeholder="2024-2025"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    {% if form.academic_year.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.academic_year.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.description.label }}</label>
+                <textarea name="{{ form.description.name }}" rows="4" 
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">{{ form.description.value|default:'' }}</textarea>
+                {% if form.description.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">{{ form.subjects.label }}</label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {% for choice in form.subjects %}
+                        <label class="flex items-center space-x-2 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                            {{ choice.tag }}
+                            <span class="text-sm text-gray-700">{{ choice.choice_label }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    {% if form.subjects.errors %}
+                    <p class="mt-2 text-sm text-red-600">{{ form.subjects.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label class="flex items-center space-x-2 p-4 border border-gray-200 rounded-lg">
+                        {% if curriculum %}
+                        <input type="checkbox" name="{{ form.is_published.name }}" {% if form.is_published.value %}checked{% endif %}
+                               class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        <span class="text-sm font-medium text-gray-700">{{ form.is_published.label }}</span>
+                        {% else %}
+                        <input type="checkbox" name="{{ form.is_published.name }}" disabled
+                               class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        <span class="text-sm font-medium text-gray-400">{{ form.is_published.label }}</span>
+                        {% endif %}
+                    </label>
+                    {% if curriculum %}
+                    <p class="mt-2 text-xs text-gray-500">Published curricula are available to teachers for lesson planning.</p>
+                    {% else %}
+                    <p class="mt-2 text-xs text-gray-500">Save the curriculum first, then add objectives before publishing.</p>
+                    {% endif %}
+                    {% if form.is_published.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.is_published.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if curriculum %}
+            <!-- Learning Objectives -->
+            <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h5 class="text-lg font-semibold text-gray-900">Learning Objectives</h5>
+                    <button type="button" id="add-objective" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg inline-flex items-center text-sm">
+                        <i class="fas fa-plus mr-2"></i> Add Objective
+                    </button>
+                </div>
+                {{ objective_formset.management_form }}
+                <div id="objective-forms" class="space-y-4">
+                    {% for form in objective_formset %}
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 objective-form">
+                        {{ form.id }}
+                        {% if form.DELETE %}
+                        <label class="flex items-center justify-end space-x-2 mb-2">
+                            {{ form.DELETE }}
+                            <span class="text-sm text-red-600 font-medium">Delete</span>
+                        </label>
+                        {% endif %}
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
                                 {{ form.title }}
                                 {% if form.title.errors %}
-                                <div class="text-danger">{{ form.title.errors }}</div>
+                                <p class="mt-1 text-sm text-red-600">{{ form.title.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                                {{ form.subject }}
+                                {% if form.subject.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.subject.errors.0 }}</p>
                                 {% endif %}
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="{{ form.academic_year.id_for_label }}">{{ form.academic_year.label }}</label>
-                                {{ form.academic_year }}
-                                {% if form.academic_year.errors %}
-                                <div class="text-danger">{{ form.academic_year.errors }}</div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Grade Level</label>
+                                {{ form.grade_level }}
+                                {% if form.grade_level.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.grade_level.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Order</label>
+                                {{ form.order }}
+                                {% if form.order.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.order.errors.0 }}</p>
                                 {% endif %}
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
-                        {{ form.description }}
-                        {% if form.description.errors %}
-                        <div class="text-danger">{{ form.description.errors }}</div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="form-group">
-                                <label for="{{ form.subjects.id_for_label }}">{{ form.subjects.label }}</label>
-                                <div class="row">
-                                    {% for choice in form.subjects %}
-                                    <div class="col-md-4">
-                                        <div class="form-check">
-                                            {{ choice.tag }}
-                                            <label class="form-check-label" for="{{ choice.id_for_label }}">
-                                                {{ choice.choice_label }}
-                                            </label>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                                {% if form.subjects.errors %}
-                                <div class="text-danger">{{ form.subjects.errors }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <div class="form-check">
-                                    {{ form.is_published }}
-                                    <label class="form-check-label" for="{{ form.is_published.id_for_label }}">
-                                        {{ form.is_published.label }}
-                                    </label>
-                                </div>
-                                {% if form.is_published.errors %}
-                                <div class="text-danger">{{ form.is_published.errors }}</div>
-                                {% endif %}
-                                <small class="form-text text-muted">
-                                    Published curricula are available to teachers for lesson planning.
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Learning Objectives -->
-                    <div class="card mt-4">
-                        <div class="card-header">
-                            <h5 class="card-title">Learning Objectives</h5>
-                            <button type="button" class="btn btn-sm add-form-btn float-right" id="add-objective">
-                                <i class="fas fa-plus"></i> Add Objective
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            {{ objective_formset.management_form }}
-                            <div id="objective-forms">
-                                {% for form in objective_formset %}
-                                <div class="formset-form objective-form">
-                                    {{ form.id }}
-                                    {% if form.DELETE %}
-                                    <div class="form-check float-right">
-                                        {{ form.DELETE }}
-                                        <label class="form-check-label text-danger" for="{{ form.DELETE.id_for_label }}">
-                                            Delete
-                                        </label>
-                                    </div>
-                                    {% endif %}
-                                    
-                                    <div class="row">
-                                        <div class="col-md-8">
-                                            <div class="form-group">
-                                                <label>{{ form.title.label }}</label>
-                                                {{ form.title }}
-                                                {% if form.title.errors %}
-                                                <div class="text-danger">{{ form.title.errors }}</div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label>{{ form.subject.label }}</label>
-                                                {{ form.subject }}
-                                                {% if form.subject.errors %}
-                                                <div class="text-danger">{{ form.subject.errors }}</div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-md-8">
-                                            <div class="form-group">
-                                                <label>{{ form.description.label }}</label>
-                                                {{ form.description }}
-                                                {% if form.description.errors %}
-                                                <div class="text-danger">{{ form.description.errors }}</div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <div class="form-group">
-                                                <label>{{ form.grade_level.label }}</label>
-                                                {{ form.grade_level }}
-                                                {% if form.grade_level.errors %}
-                                                <div class="text-danger">{{ form.grade_level.errors }}</div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <div class="form-group">
-                                                <label>{{ form.order.label }}</label>
-                                                {{ form.order }}
-                                                {% if form.order.errors %}
-                                                <div class="text-danger">{{ form.order.errors }}</div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Syllabus Content -->
-                    <div class="card mt-4">
-                        <div class="card-header">
-                            <h5 class="card-title">Syllabus Content</h5>
-                            <button type="button" class="btn btn-sm add-form-btn float-right" id="add-syllabus">
-                                <i class="fas fa-plus"></i> Add Content
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            {{ syllabus_formset.management_form }}
-                            <div id="syllabus-forms">
-                                {% for form in syllabus_formset %}
-                                <div class="formset-form syllabus-form">
-                                    {{ form.id }}
-                                    {% if form.DELETE %}
-                                    <div class="form-check float-right">
-                                        {{ form.DELETE }}
-                                        <label class="form-check-label text-danger" for="{{ form.DELETE.id_for_label }}">
-                                            Delete
-                                        </label>
-                                    </div>
-                                    {% endif %}
-                                    
-                                    <div class="row">
-                                        <div class="col-md-8">
-                                            <div class="form-group">
-                                                <label>{{ form.subject.label }}</label>
-                                                {{ form.subject }}
-                                                {% if form.subject.errors %}
-                                                <div class="text-danger">{{ form.subject.errors }}</div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label>{{ form.order.label }}</label>
-                                                {{ form.order }}
-                                                {% if form.order.errors %}
-                                                <div class="text-danger">{{ form.order.errors }}</div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label>{{ form.content.label }}</label>
-                                        {{ form.content }}
-                                        {% if form.content.errors %}
-                                        <div class="text-danger">{{ form.content.errors }}</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Form Errors -->
-                    {% if form.non_field_errors %}
-                    <div class="alert alert-danger mt-3">
-                        {{ form.non_field_errors }}
-                    </div>
-                    {% endif %}
-                    
-                    <!-- Submit Buttons -->
-                    <div class="form-group mt-4">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> {{ action }} Curriculum
-                        </button>
-                        <a href="{% if curriculum %}{% url 'academic:curriculum_detail' curriculum.id %}{% else %}{% url 'academic:curriculum_list' %}{% endif %}" 
-                           class="btn btn-secondary ml-2">
-                            <i class="fas fa-times"></i> Cancel
-                        </a>
-                    </div>
-                </form>
+                    {% endfor %}
+                </div>
             </div>
-        </div>
+            
+            <!-- Syllabus Content -->
+            <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h5 class="text-lg font-semibold text-gray-900">Syllabus Content</h5>
+                    <button type="button" id="add-syllabus" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg inline-flex items-center text-sm">
+                        <i class="fas fa-plus mr-2"></i> Add Content
+                    </button>
+                </div>
+                {{ syllabus_formset.management_form }}
+                <div id="syllabus-forms" class="space-y-4">
+                    {% for form in syllabus_formset %}
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 syllabus-form">
+                        {{ form.id }}
+                        {% if form.DELETE %}
+                        <label class="flex items-center justify-end space-x-2 mb-2">
+                            {{ form.DELETE }}
+                            <span class="text-sm text-red-600 font-medium">Delete</span>
+                        </label>
+                        {% endif %}
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                            <div class="md:col-span-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                                {{ form.subject }}
+                                {% if form.subject.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.subject.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Order</label>
+                                {{ form.order }}
+                                {% if form.order.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.order.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Content</label>
+                            {{ form.content }}
+                            {% if form.content.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.content.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <!-- Form Errors -->
+            {% if form.non_field_errors %}
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+                <div class="flex">
+                    <i class="fas fa-exclamation-circle text-red-400 mr-3"></i>
+                    <div class="text-sm text-red-700">{{ form.non_field_errors }}</div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Submit Buttons -->
+            <div class="flex space-x-4">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg inline-flex items-center">
+                    <i class="fas fa-save mr-2"></i> {{ action }} Curriculum
+                </button>
+                <a href="{% if curriculum %}{% url 'academic:curriculum_detail' curriculum.id %}{% else %}{% url 'academic:curriculum_list' %}{% endif %}" 
+                   class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg inline-flex items-center">
+                    <i class="fas fa-times mr-2"></i> Cancel
+                </a>
+            </div>
+        </form>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
+<style>
+.objective-form input[type="checkbox"]:checked ~ * {
+    opacity: 0.5;
+}
+.syllabus-form input[type="checkbox"]:checked ~ * {
+    opacity: 0.5;
+}
+</style>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function() {
-    // Handle formset deletion
-    $(document).on('change', 'input[id$="-DELETE"]', function() {
-        var form = $(this).closest('.formset-form');
-        if ($(this).is(':checked')) {
-            form.addClass('to-delete');
-        } else {
-            form.removeClass('to-delete');
-        }
-    });
+    // Style form fields
+    $('input[type="text"], input[type="number"], textarea, select').not('[type="checkbox"]').addClass('w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent');
+    $('select').addClass('w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent');
     
     // Add new objective form
     $('#add-objective').click(function() {
         var formCount = parseInt($('#id_objectives-TOTAL_FORMS').val());
         var newForm = $('#objective-forms .objective-form:first').clone();
         
-        // Update form index
         newForm.html(newForm.html().replace(/objectives-0-/g, 'objectives-' + formCount + '-'));
         newForm.find('input, select, textarea').each(function() {
-            $(this).attr('name', $(this).attr('name').replace(/objectives-0-/g, 'objectives-' + formCount + '-'));
-            $(this).attr('id', $(this).attr('id').replace(/objectives-0-/g, 'objectives-' + formCount + '-'));
-            $(this).val('');
+            var name = $(this).attr('name');
+            var id = $(this).attr('id');
+            if (name) $(this).attr('name', name.replace(/objectives-0-/g, 'objectives-' + formCount + '-'));
+            if (id) $(this).attr('id', id.replace(/objectives-0-/g, 'objectives-' + formCount + '-'));
+            if (!$(this).is('[type="checkbox"]')) $(this).val('');
+            if ($(this).is('[type="checkbox"]')) $(this).prop('checked', false);
         });
-        
-        // Clear CKEditor content
-        newForm.find('textarea[id*="content"]').val('');
         
         $('#objective-forms').append(newForm);
         $('#id_objectives-TOTAL_FORMS').val(formCount + 1);
@@ -312,16 +264,15 @@ $(document).ready(function() {
         var formCount = parseInt($('#id_syllabus-TOTAL_FORMS').val());
         var newForm = $('#syllabus-forms .syllabus-form:first').clone();
         
-        // Update form index
         newForm.html(newForm.html().replace(/syllabus-0-/g, 'syllabus-' + formCount + '-'));
         newForm.find('input, select, textarea').each(function() {
-            $(this).attr('name', $(this).attr('name').replace(/syllabus-0-/g, 'syllabus-' + formCount + '-'));
-            $(this).attr('id', $(this).attr('id').replace(/syllabus-0-/g, 'syllabus-' + formCount + '-'));
-            $(this).val('');
+            var name = $(this).attr('name');
+            var id = $(this).attr('id');
+            if (name) $(this).attr('name', name.replace(/syllabus-0-/g, 'syllabus-' + formCount + '-'));
+            if (id) $(this).attr('id', id.replace(/syllabus-0-/g, 'syllabus-' + formCount + '-'));
+            if (!$(this).is('[type="checkbox"]')) $(this).val('');
+            if ($(this).is('[type="checkbox"]')) $(this).prop('checked', false);
         });
-        
-        // Clear CKEditor content
-        newForm.find('textarea[id*="content"]').val('');
         
         $('#syllabus-forms').append(newForm);
         $('#id_syllabus-TOTAL_FORMS').val(formCount + 1);

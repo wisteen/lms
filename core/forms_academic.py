@@ -122,6 +122,15 @@ class LessonPlanForm(forms.ModelForm):
             self.fields['learning_objectives'].queryset = self.instance.curriculum.learning_objectives.filter(
                 subject=self.instance.subject
             )
+        elif self.data.get('curriculum') and self.data.get('subject'):
+            # For POST requests, load objectives based on submitted data
+            try:
+                curriculum = Curriculum.objects.get(pk=self.data.get('curriculum'))
+                self.fields['learning_objectives'].queryset = curriculum.learning_objectives.filter(
+                    subject_id=self.data.get('subject')
+                )
+            except (Curriculum.DoesNotExist, ValueError):
+                self.fields['learning_objectives'].queryset = LearningObjective.objects.none()
         else:
             self.fields['learning_objectives'].queryset = LearningObjective.objects.none()
 
@@ -249,6 +258,8 @@ class AssignmentSubmissionForm(forms.ModelForm):
         assignment = kwargs.pop('assignment', None)
         super().__init__(*args, **kwargs)
         
+        self.fields['submission_text'].required = False
+        
         if assignment:
             # Check if assignment allows submissions
             if assignment.is_overdue() and not assignment.allow_late_submission:
@@ -261,6 +272,7 @@ class SubmissionFileForm(forms.Form):
     """Form for uploading submission files"""
     
     file = forms.FileField(
+        required=False,
         help_text="Select a file to upload with your submission."
     )
     

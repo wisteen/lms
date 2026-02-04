@@ -23,11 +23,13 @@ from .services_notification_tracking import NotificationTrackingService
 from .services_reports import ReportService
 from .services_report_customization import ReportCustomizationService, ScheduledReport, ReportExecution
 
+from .decorators import financial_access_required
+
 @login_required
+@financial_access_required
 def financial_dashboard(request):
     """Main financial dashboard"""
-    if request.user.role not in ['super_admin']:
-        return redirect('dashboard')
+    # Access already checked by decorator
     
     # Financial summary
     current_month = timezone.now().date().replace(day=1)

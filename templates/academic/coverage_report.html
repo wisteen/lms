@@ -1,217 +1,46 @@
 {% extends 'base.html' %}
 
-{% block title %}Curriculum Coverage Reports{% endblock %}
+{% block title %}Coverage Report{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <!-- Header -->
-            <div class="mb-4">
-                <h2>Curriculum Coverage Reports</h2>
-                <p class="text-muted">Monitor curriculum completion progress across classes</p>
-            </div>
-
-            <!-- Selection Form -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-chart-line"></i> Generate Coverage Report
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <form method="get" action="{% url 'academic:coverage_report' %}">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="curriculum">Select Curriculum</label>
-                                    <select name="curriculum" id="curriculum" class="form-control" required>
-                                        <option value="">Choose a curriculum...</option>
-                                        {% for curriculum in curricula %}
-                                        <option value="{{ curriculum.id }}" 
-                                                {% if request.GET.curriculum == curriculum.id|stringformat:"s" %}selected{% endif %}>
-                                            {{ curriculum.title }} ({{ curriculum.academic_year }})
-                                        </option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="class">Select Class</label>
-                                    <select name="class" id="class" class="form-control" required>
-                                        <option value="">Choose a class...</option>
-                                        {% for class in classes %}
-                                        <option value="{{ class.id }}" 
-                                                {% if request.GET.class == class.id|stringformat:"s" %}selected{% endif %}>
-                                            {{ class.name }} {{ class.stream }}
-                                        </option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-chart-bar"></i> Generate Report
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Quick Stats -->
-            {% if curricula %}
-            <div class="row mt-4">
-                <div class="col-md-3">
-                    <div class="card bg-primary text-white">
-                        <div class="card-body text-center">
-                            <h4>{{ curricula.count }}</h4>
-                            <p class="mb-0">Available Curricula</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card bg-info text-white">
-                        <div class="card-body text-center">
-                            <h4>{{ classes.count }}</h4>
-                            <p class="mb-0">Classes</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card bg-success text-white">
-                        <div class="card-body text-center">
-                            <h4>{{ curricula|length }}</h4>
-                            <p class="mb-0">Active Programs</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card bg-warning text-white">
-                        <div class="card-body text-center">
-                            <h4>{{ academic_years.count|default:1 }}</h4>
-                            <p class="mb-0">Academic Years</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Recent Reports -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-history"></i> Quick Access
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% if curricula and classes %}
-                    <div class="row">
-                        {% for curriculum in curricula|slice:":3" %}
-                        <div class="col-md-4 mb-3">
-                            <div class="card border-left-primary">
-                                <div class="card-body">
-                                    <h6 class="card-title">{{ curriculum.title }}</h6>
-                                    <p class="card-text text-muted">{{ curriculum.academic_year }}</p>
-                                    <div class="mb-2">
-                                        <small class="text-muted">Subjects:</small>
-                                        {% for subject in curriculum.subjects.all|slice:":3" %}
-                                        <span class="badge badge-secondary mr-1">{{ subject.name }}</span>
-                                        {% endfor %}
-                                        {% if curriculum.subjects.count > 3 %}
-                                        <span class="badge badge-light">+{{ curriculum.subjects.count|add:"-3" }} more</span>
-                                        {% endif %}
-                                    </div>
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-outline-primary dropdown-toggle" 
-                                                type="button" data-toggle="dropdown">
-                                            View Report
-                                        </button>
-                                        <div class="dropdown-menu">
-                                            {% for class in classes|slice:":5" %}
-                                            <a class="dropdown-item" 
-                                               href="{% url 'academic:coverage_report' %}?curriculum={{ curriculum.id }}&class={{ class.id }}">
-                                                {{ class.name }} {{ class.stream }}
-                                            </a>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-2xl font-bold text-gray-900">Curriculum Coverage Report</h3>
+            <p class="text-gray-600 mt-1">Select a curriculum and class to generate coverage report</p>
+        </div>
+        
+        <div class="p-6">
+            <form method="get" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Curriculum</label>
+                    <select name="curriculum" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Select Curriculum</option>
+                        {% for curriculum in curricula %}
+                        <option value="{{ curriculum.id }}" {% if request.GET.curriculum == curriculum.id|stringformat:"s" %}selected{% endif %}>
+                            {{ curriculum.title }} ({{ curriculum.academic_year }})
+                        </option>
                         {% endfor %}
-                    </div>
-                    {% else %}
-                    <div class="text-center py-4">
-                        <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">No Data Available</h5>
-                        <p class="text-muted">
-                            {% if not curricula %}
-                            No curricula found. Create a curriculum first to generate coverage reports.
-                            {% elif not classes %}
-                            No classes found. Ensure classes are set up in the system.
-                            {% endif %}
-                        </p>
-                        {% if not curricula %}
-                        <a href="{% url 'academic:curriculum_create' %}" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Create Curriculum
-                        </a>
-                        {% endif %}
-                    </div>
-                    {% endif %}
+                    </select>
                 </div>
-            </div>
-
-            <!-- Help Section -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-question-circle"></i> How to Use Coverage Reports
-                    </h5>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Class</label>
+                    <select name="class" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Select Class</option>
+                        {% for class in classes %}
+                        <option value="{{ class.id }}" {% if request.GET.class == class.id|stringformat:"s" %}selected{% endif %}>
+                            {{ class.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6>What are Coverage Reports?</h6>
-                            <p class="text-muted">
-                                Coverage reports show how much of a curriculum has been completed for each class. 
-                                They track progress based on completed lesson plans and learning objectives.
-                            </p>
-                        </div>
-                        <div class="col-md-6">
-                            <h6>How to Generate a Report</h6>
-                            <ol class="text-muted">
-                                <li>Select a curriculum from the dropdown</li>
-                                <li>Choose the class you want to analyze</li>
-                                <li>Click "Generate Report" to view detailed coverage</li>
-                            </ol>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg inline-flex items-center justify-center">
+                    <i class="fas fa-chart-bar mr-2"></i> Generate Report
+                </button>
+            </form>
         </div>
     </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Auto-submit form when both selections are made
-    const curriculumSelect = document.getElementById('curriculum');
-    const classSelect = document.getElementById('class');
-    
-    function checkAutoSubmit() {
-        if (curriculumSelect.value && classSelect.value) {
-            // Optional: Auto-submit after a short delay
-            // setTimeout(() => {
-            //     document.querySelector('form').submit();
-            // }, 500);
-        }
-    }
-    
-    curriculumSelect.addEventListener('change', checkAutoSubmit);
-    classSelect.addEventListener('change', checkAutoSubmit);
-});
-</script>
 {% endblock %}

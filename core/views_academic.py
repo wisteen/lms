@@ -87,7 +87,7 @@ def curriculum_detail(request, curriculum_id):
         teacher = getattr(request.user, 'teacher', None)
         if teacher and not curriculum.subjects.filter(id__in=teacher.subjects.all()).exists():
             messages.error(request, 'You do not have permission to view this curriculum.')
-            return redirect('curriculum_list')
+            return redirect('academic:curriculum_list')
     
     learning_objectives = curriculum.learning_objectives.all().order_by('subject', 'order')
     syllabus_contents = curriculum.syllabus_contents.all().order_by('subject', 'order')
@@ -107,38 +107,24 @@ def curriculum_create(request):
     
     if request.user.role not in ['super_admin', 'subject_teacher']:
         messages.error(request, 'You do not have permission to create curricula.')
-        return redirect('curriculum_list')
+        return redirect('academic:curriculum_list')
     
     if request.method == 'POST':
         form = CurriculumForm(request.POST, user=request.user)
-        objective_formset = LearningObjectiveFormSet(request.POST, prefix='objectives')
-        syllabus_formset = SyllabusContentFormSet(request.POST, prefix='syllabus')
         
-        if form.is_valid() and objective_formset.is_valid() and syllabus_formset.is_valid():
+        if form.is_valid():
             curriculum = form.save(commit=False)
             curriculum.created_by = request.user
             curriculum.save()
             form.save_m2m()  # Save many-to-many relationships
             
-            # Save learning objectives
-            objective_formset.instance = curriculum
-            objective_formset.save()
-            
-            # Save syllabus contents
-            syllabus_formset.instance = curriculum
-            syllabus_formset.save()
-            
-            messages.success(request, 'Curriculum created successfully.')
-            return redirect('curriculum_detail', curriculum_id=curriculum.id)
+            messages.success(request, 'Curriculum created successfully. You can now add learning objectives and syllabus content.')
+            return redirect('academic:curriculum_edit', curriculum_id=curriculum.id)
     else:
         form = CurriculumForm(user=request.user)
-        objective_formset = LearningObjectiveFormSet(prefix='objectives')
-        syllabus_formset = SyllabusContentFormSet(prefix='syllabus')
     
     context = {
         'form': form,
-        'objective_formset': objective_formset,
-        'syllabus_formset': syllabus_formset,
         'action': 'Create',
     }
     
@@ -156,10 +142,10 @@ def curriculum_edit(request, curriculum_id):
         teacher = getattr(request.user, 'teacher', None)
         if teacher and curriculum.created_by != request.user:
             messages.error(request, 'You can only edit curricula you created.')
-            return redirect('curriculum_detail', curriculum_id=curriculum.id)
+            return redirect('academic:curriculum_detail', curriculum_id=curriculum.id)
     elif request.user.role not in ['super_admin']:
         messages.error(request, 'You do not have permission to edit this curriculum.')
-        return redirect('curriculum_detail', curriculum_id=curriculum.id)
+        return redirect('academic:curriculum_detail', curriculum_id=curriculum.id)
     
     if request.method == 'POST':
         form = CurriculumForm(request.POST, instance=curriculum, user=request.user)
@@ -172,7 +158,7 @@ def curriculum_edit(request, curriculum_id):
             syllabus_formset.save()
             
             messages.success(request, 'Curriculum updated successfully.')
-            return redirect('curriculum_detail', curriculum_id=curriculum.id)
+            return redirect('academic:curriculum_detail', curriculum_id=curriculum.id)
     else:
         form = CurriculumForm(instance=curriculum, user=request.user)
         objective_formset = LearningObjectiveFormSet(instance=curriculum, prefix='objectives')
@@ -259,7 +245,9 @@ def lesson_plan_create(request):
             form.save_m2m()  # Save learning objectives
             
             messages.success(request, 'Lesson plan created successfully.')
-            return redirect('lesson_plan_detail', lesson_plan_id=lesson_plan.id)
+            return redirect('academic:lesson_plan_detail', lesson_plan_id=lesson_plan.id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = LessonPlanForm(user=request.user)
     
@@ -283,13 +271,52 @@ def lesson_plan_detail(request, lesson_plan_id):
         teacher = getattr(request.user, 'teacher', None)
         if teacher and lesson_plan.teacher != teacher:
             messages.error(request, 'You can only view your own lesson plans.')
-            return redirect('lesson_plan_list')
+            return redirect('academic:lesson_plan_list')
     
     context = {
         'lesson_plan': lesson_plan,
     }
     
     return render(request, 'academic/lesson_plan_detail.html', context)
+
+
+@login_required
+def lesson_plan_edit(request, lesson_plan_id):
+    """Edit an existing lesson plan"""
+    
+    lesson_plan = get_object_or_404(LessonPlan, id=lesson_plan_id)
+    
+    if request.user.role != 'subject_teacher':
+        messages.error(request, 'Only teachers can edit lesson plans.')
+        return redirect('dashboard')
+    
+    teacher = get_object_or_404(Teacher, user=request.user)
+    
+    if lesson_plan.teacher != teacher:
+        messages.error(request, 'You can only edit your own lesson plans.')
+        return redirect('academic:lesson_plan_detail', lesson_plan_id=lesson_plan.id)
+    
+    if request.method == 'POST':
+        form = LessonPlanForm(request.POST, instance=lesson_plan, user=request.user)
+        
+        if form.is_valid():
+            form.save()
+            
+            messages.success(request, 'Lesson plan updated successfully.')
+            return redirect('academic:lesson_plan_detail', lesson_plan_id=lesson_plan.id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = LessonPlanForm(instance=lesson_plan, user=request.user)
+    
+    context = {
+        'form': form,
+        'lesson_plan': lesson_plan,
+        'teacher': teacher,
+        'action': 'Edit',
+    }
+    
+    return render(request, 'academic/lesson_plan_form.html', context)
 
 
 @login_required
@@ -341,17 +368,23 @@ def coverage_report(request):
             if teacher:
                 if not curriculum.subjects.filter(id__in=teacher.subjects.all()).exists():
                     messages.error(request, 'You do not have permission to view this curriculum.')
-                    return redirect('coverage_report')
+                    return redirect('academic:coverage_report')
                 if school_class not in teacher.classes.all():
                     messages.error(request, 'You do not have permission to view this class.')
-                    return redirect('coverage_report')
+                    return redirect('academic:coverage_report')
         
         report_data = ReportGenerator.generate_curriculum_coverage_report(curriculum, school_class)
         
         context = {
-            'report_data': report_data,
+            'report_data': report_data['statistics'],
+            'coverage_by_objective': report_data['coverage_data'],
+            'objectives_by_subject': report_data['objectives_by_subject'],
             'curriculum': curriculum,
             'school_class': school_class,
+            'completed_objectives': report_data['statistics']['completed_objectives'],
+            'at_risk_objectives': report_data['statistics']['at_risk_objectives'],
+            'total_objectives': report_data['statistics']['total_objectives'],
+            'overall_coverage': report_data['statistics']['overall_completion_percentage'],
         }
         
         return render(request, 'academic/coverage_report_detail.html', context)
@@ -382,7 +415,7 @@ def assignment_list(request):
     
     if request.user.role == 'student':
         return student_assignment_list(request)
-    elif request.user.role == 'subject_teacher':
+    elif request.user.role in ['subject_teacher', 'class_teacher']:
         return teacher_assignment_list(request)
     else:
         messages.error(request, 'You do not have permission to view assignments.')
@@ -456,7 +489,7 @@ def assignment_create(request):
             form.save_m2m()  # Save school classes
             
             messages.success(request, 'Assignment created successfully.')
-            return redirect('assignment_detail', assignment_id=assignment.id)
+            return redirect('academic:assignment_detail', assignment_id=assignment.id)
     else:
         form = AssignmentForm(user=request.user)
     
@@ -464,6 +497,45 @@ def assignment_create(request):
         'form': form,
         'teacher': teacher,
         'action': 'Create',
+    }
+    
+    return render(request, 'academic/assignment_form.html', context)
+
+
+@login_required
+def assignment_edit(request, assignment_id):
+    """Edit an existing assignment"""
+    
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    
+    if request.user.role != 'subject_teacher':
+        messages.error(request, 'Only teachers can edit assignments.')
+        return redirect('dashboard')
+    
+    teacher = get_object_or_404(Teacher, user=request.user)
+    
+    if assignment.teacher != teacher:
+        messages.error(request, 'You can only edit your own assignments.')
+        return redirect('academic:assignment_detail', assignment_id=assignment.id)
+    
+    if request.method == 'POST':
+        form = AssignmentForm(request.POST, request.FILES, instance=assignment, user=request.user)
+        
+        if form.is_valid():
+            form.save()
+            
+            messages.success(request, 'Assignment updated successfully.')
+            return redirect('academic:assignment_detail', assignment_id=assignment.id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = AssignmentForm(instance=assignment, user=request.user)
+    
+    context = {
+        'form': form,
+        'assignment': assignment,
+        'teacher': teacher,
+        'action': 'Edit',
     }
     
     return render(request, 'academic/assignment_form.html', context)
@@ -482,7 +554,7 @@ def assignment_detail(request, assignment_id):
         # Check if student is in assigned classes
         if student.school_class not in assignment.school_classes.all():
             messages.error(request, 'You are not assigned to this assignment.')
-            return redirect('assignment_list')
+            return redirect('academic:assignment_list')
         
         # Get submission if exists
         try:
@@ -503,7 +575,7 @@ def assignment_detail(request, assignment_id):
         teacher = getattr(request.user, 'teacher', None)
         if teacher and assignment.teacher != teacher:
             messages.error(request, 'You can only view your own assignments.')
-            return redirect('assignment_list')
+            return redirect('academic:assignment_list')
         
         stats = AssignmentTracker.get_submission_statistics(assignment)
         submissions = AssignmentSubmission.objects.filter(assignment=assignment).select_related('student__user')
@@ -536,48 +608,56 @@ def submit_assignment(request, assignment_id):
     # Check if student is in assigned classes
     if student.school_class not in assignment.school_classes.all():
         messages.error(request, 'You are not assigned to this assignment.')
-        return redirect('assignment_list')
+        return redirect('academic:assignment_list')
     
     # Check if assignment is overdue and late submissions not allowed
     if assignment.is_overdue() and not assignment.allow_late_submission:
         messages.error(request, 'This assignment is overdue and late submissions are not allowed.')
-        return redirect('assignment_detail', assignment_id=assignment.id)
+        return redirect('academic:assignment_detail', assignment_id=assignment.id)
     
-    # Check if already submitted
+    # Check if already submitted and graded
     existing_submission = AssignmentSubmission.objects.filter(
         assignment=assignment, student=student
     ).first()
     
+    if existing_submission and existing_submission.score is not None:
+        messages.error(request, 'This assignment has been graded. You cannot edit your submission.')
+        return redirect('academic:assignment_detail', assignment_id=assignment.id)
+    
     if request.method == 'POST':
         form = AssignmentSubmissionForm(request.POST, assignment=assignment, instance=existing_submission)
-        file_form = SubmissionFileForm(request.POST, request.FILES)
         
         if form.is_valid():
-            submission = form.save(commit=False)
-            if not existing_submission:
-                submission.assignment = assignment
-                submission.student = student
-            submission.save()
+            has_text = form.cleaned_data.get('submission_text', '').strip()
+            has_file = request.FILES.get('file')
             
-            # Handle file uploads
-            if file_form.is_valid() and file_form.cleaned_data.get('file'):
-                file = file_form.cleaned_data['file']
-                SubmissionFile.objects.create(
-                    submission=submission,
-                    file=file,
-                    original_filename=file.name
-                )
-            
-            messages.success(request, 'Assignment submitted successfully.')
-            return redirect('assignment_detail', assignment_id=assignment.id)
+            if not has_text and not has_file:
+                messages.error(request, 'Please provide either a text response or upload a file.')
+            else:
+                submission = form.save(commit=False)
+                if not existing_submission:
+                    submission.assignment = assignment
+                    submission.student = student
+                submission.save()
+                
+                # Handle file uploads
+                if has_file:
+                    SubmissionFile.objects.create(
+                        submission=submission,
+                        file=has_file,
+                        original_filename=has_file.name
+                    )
+                
+                messages.success(request, 'Assignment submitted successfully.')
+                return redirect('academic:assignment_detail', assignment_id=assignment.id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = AssignmentSubmissionForm(assignment=assignment, instance=existing_submission)
-        file_form = SubmissionFileForm()
     
     context = {
         'assignment': assignment,
         'form': form,
-        'file_form': file_form,
         'existing_submission': existing_submission,
         'student': student,
     }
@@ -637,3 +717,83 @@ def get_learning_objectives(request):
         return JsonResponse({'objectives': list(objectives)})
     
     return JsonResponse({'objectives': []})
+
+
+@login_required
+def student_curriculum_view(request):
+    """View curriculum for students"""
+    
+    if request.user.role != 'student':
+        messages.error(request, 'Only students can access this page.')
+        return redirect('dashboard')
+    
+    student = get_object_or_404(Student, user=request.user)
+    
+    # Get published curricula
+    curricula = Curriculum.objects.filter(
+        is_published=True
+    ).distinct().prefetch_related('subjects', 'learning_objectives')
+    
+    context = {
+        'curricula': curricula,
+        'student': student,
+    }
+    
+    return render(request, 'academic/student_curriculum_list.html', context)
+
+
+@login_required
+def student_lesson_plans_view(request):
+    """View lesson plans for students"""
+    
+    if request.user.role != 'student':
+        messages.error(request, 'Only students can access this page.')
+        return redirect('dashboard')
+    
+    student = get_object_or_404(Student, user=request.user)
+    
+    # Get lesson plans for student's class
+    lesson_plans = LessonPlan.objects.filter(
+        school_class=student.school_class
+    ).select_related('curriculum', 'subject', 'teacher').order_by('-created_at')
+    
+    context = {
+        'lesson_plans': lesson_plans,
+        'student': student,
+    }
+    
+    return render(request, 'academic/student_lesson_plans.html', context)
+
+
+@login_required
+def grade_submission(request, submission_id):
+    """Grade a student submission"""
+    
+    if request.user.role != 'subject_teacher':
+        messages.error(request, 'Only teachers can grade submissions.')
+        return redirect('dashboard')
+    
+    submission = get_object_or_404(AssignmentSubmission, id=submission_id)
+    teacher = get_object_or_404(Teacher, user=request.user)
+    
+    if submission.assignment.teacher != teacher:
+        messages.error(request, 'You can only grade submissions for your own assignments.')
+        return redirect('academic:assignment_list')
+    
+    if request.method == 'POST':
+        score = request.POST.get('score')
+        feedback = request.POST.get('feedback', '')
+        
+        if score:
+            submission.score = score
+        submission.feedback = feedback
+        submission.save()
+        
+        messages.success(request, 'Submission graded successfully.')
+        return redirect('academic:assignment_detail', assignment_id=submission.assignment.id)
+    
+    context = {
+        'submission': submission,
+    }
+    
+    return render(request, 'academic/grade_submission.html', context)

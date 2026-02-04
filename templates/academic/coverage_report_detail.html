@@ -1,263 +1,90 @@
 {% extends 'base.html' %}
 
-{% block title %}Coverage Report - {{ curriculum.title }} - {{ school_class.name }}{% endblock %}
+{% block title %}Coverage Report - {{ curriculum.title }}{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h2>Curriculum Coverage Report</h2>
-                    <p class="text-muted">
-                        {{ curriculum.title }} - {{ school_class.name }} {{ school_class.stream }}
-                        <br>Academic Year: {{ curriculum.academic_year }}
-                    </p>
-                </div>
-                <div>
-                    <a href="{% url 'academic:coverage_report' %}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Back to Selection
-                    </a>
-                    <button onclick="window.print()" class="btn btn-outline-primary">
-                        <i class="fas fa-print"></i> Print Report
-                    </button>
+<div class="max-w-7xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow-lg">
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <div>
+                <h3 class="text-2xl font-bold text-gray-900">Coverage Report</h3>
+                <p class="text-gray-600 mt-1">{{ curriculum.title }} - {{ school_class.name }}</p>
+            </div>
+            <a href="{% url 'academic:coverage_report' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg inline-flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i> Back
+            </a>
+        </div>
+        
+        <div class="p-6">
+            <!-- Overall Coverage -->
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                <h4 class="text-lg font-semibold text-blue-900 mb-2">Overall Coverage</h4>
+                <div class="flex items-center space-x-4">
+                    <div class="flex-1">
+                        <div class="w-full bg-gray-200 rounded-full h-4">
+                            <div class="bg-blue-600 h-4 rounded-full" style="width: {{ overall_coverage }}%"></div>
+                        </div>
+                    </div>
+                    <span class="text-2xl font-bold text-blue-900">{{ overall_coverage|floatformat:1 }}%</span>
                 </div>
             </div>
-
-            <!-- Overall Progress -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-chart-pie"></i> Overall Progress
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <div class="progress mx-auto mb-2" style="width: 100px; height: 100px; border-radius: 50%; position: relative;">
-                                    <div class="progress-bar" role="progressbar" 
-                                         style="width: {{ report_data.overall_percentage }}%;">
-                                    </div>
-                                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 18px; font-weight: bold;">
-                                        {{ report_data.overall_percentage|floatformat:1 }}%
-                                    </div>
-                                </div>
-                                <h6>Overall Completion</h6>
-                            </div>
+            
+            <!-- Coverage by Objective -->
+            <h4 class="text-lg font-semibold text-gray-900 mb-4">Coverage by Learning Objective</h4>
+            <div class="space-y-4">
+                {% for item in coverage_by_objective %}
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex-1">
+                            <h5 class="font-semibold text-gray-900">{{ item.objective.title }}</h5>
+                            <p class="text-sm text-gray-600 mt-1">{{ item.objective.subject.name }}</p>
                         </div>
-                        <div class="col-md-9">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <div class="card bg-success text-white">
-                                        <div class="card-body text-center">
-                                            <h4>{{ report_data.completed_objectives }}</h4>
-                                            <p class="mb-0">Completed</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card bg-warning text-white">
-                                        <div class="card-body text-center">
-                                            <h4>{{ report_data.in_progress_objectives }}</h4>
-                                            <p class="mb-0">In Progress</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card bg-danger text-white">
-                                        <div class="card-body text-center">
-                                            <h4>{{ report_data.not_started_objectives }}</h4>
-                                            <p class="mb-0">Not Started</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card bg-info text-white">
-                                        <div class="card-body text-center">
-                                            <h4>{{ report_data.total_objectives }}</h4>
-                                            <p class="mb-0">Total Objectives</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <span class="text-lg font-bold {% if item.completion_percentage >= 50 %}text-green-600{% else %}text-yellow-600{% endif %}">
+                            {{ item.completion_percentage|floatformat:1 }}%
+                        </span>
                     </div>
-                </div>
-            </div>
-
-            <!-- Detailed Progress by Topic -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-list"></i> Progress by Topic
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% for topic_data in report_data.topics %}
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="mb-0">{{ topic_data.topic.title }}</h6>
-                            <span class="badge badge-primary">{{ topic_data.percentage|floatformat:1 }}% Complete</span>
-                        </div>
-                        <div class="progress mb-2">
-                            <div class="progress-bar" role="progressbar" 
-                                 style="width: {{ topic_data.percentage }}%"
-                                 aria-valuenow="{{ topic_data.percentage }}" 
-                                 aria-valuemin="0" aria-valuemax="100">
-                            </div>
-                        </div>
-                        
-                        <!-- Learning Objectives for this topic -->
-                        <div class="row">
-                            {% for objective in topic_data.objectives %}
-                            <div class="col-md-6 mb-2">
-                                <div class="card border-left-{{ objective.status_color }}">
-                                    <div class="card-body py-2">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <small>{{ objective.objective.description }}</small>
-                                            <span class="badge badge-{{ objective.status_color }}">
-                                                {{ objective.status|title }}
-                                            </span>
-                                        </div>
-                                        {% if objective.lesson_plans %}
-                                        <div class="mt-1">
-                                            <small class="text-muted">
-                                                Covered in: 
-                                                {% for plan in objective.lesson_plans %}
-                                                    {{ plan.title }}{% if not forloop.last %}, {% endif %}
-                                                {% endfor %}
-                                            </small>
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
+                    
+                    <div class="w-full bg-gray-200 rounded-full h-3 mb-2">
+                        <div class="{% if item.completion_percentage >= 50 %}bg-green-500{% else %}bg-yellow-500{% endif %} h-3 rounded-full" 
+                             style="width: {{ item.completion_percentage }}%"></div>
                     </div>
-                    {% empty %}
-                    <div class="text-center text-muted py-4">
-                        <i class="fas fa-info-circle fa-2x mb-2"></i>
-                        <p>No curriculum data available for this class.</p>
+                    
+                    <div class="flex justify-between text-sm text-gray-600 mb-2">
+                        <span>{{ item.completed_lessons }} of {{ item.total_planned_lessons }} lessons completed</span>
+                        {% if item.is_at_risk %}
+                        <span class="text-yellow-600 font-medium">⚠️ At Risk</span>
+                        {% endif %}
                     </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Timeline View -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-calendar"></i> Coverage Timeline
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% if report_data.timeline %}
-                    <div class="timeline">
-                        {% for item in report_data.timeline %}
-                        <div class="timeline-item">
-                            <div class="timeline-marker bg-{{ item.status_color }}"></div>
-                            <div class="timeline-content">
-                                <h6 class="mb-1">{{ item.date|date:"M d, Y" }}</h6>
-                                <p class="mb-1">{{ item.title }}</p>
-                                <small class="text-muted">{{ item.description }}</small>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <div class="text-center text-muted py-4">
-                        <i class="fas fa-calendar-times fa-2x mb-2"></i>
-                        <p>No timeline data available.</p>
+                    
+                    {% if item.remaining_lessons_count > 0 %}
+                    <div class="mt-2 text-sm">
+                        <p class="text-gray-600">Remaining: {{ item.remaining_lessons_count }} lesson(s)</p>
+                        {% if item.estimated_completion_date %}
+                        <p class="text-gray-500">Est. completion: {{ item.estimated_completion_date|date:"M d, Y" }}</p>
+                        {% endif %}
                     </div>
                     {% endif %}
                 </div>
+                {% endfor %}
             </div>
-
-            <!-- Recommendations -->
-            {% if report_data.recommendations %}
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-lightbulb"></i> Recommendations
-                    </h5>
+            
+            <!-- Summary Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                <div class="bg-green-50 rounded-lg p-4">
+                    <div class="text-2xl font-bold text-green-600">{{ completed_objectives }}</div>
+                    <div class="text-sm text-green-700">Completed Objectives</div>
                 </div>
-                <div class="card-body">
-                    <div class="alert alert-info">
-                        <ul class="mb-0">
-                            {% for recommendation in report_data.recommendations %}
-                            <li>{{ recommendation }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
+                <div class="bg-yellow-50 rounded-lg p-4">
+                    <div class="text-2xl font-bold text-yellow-600">{{ at_risk_objectives }}</div>
+                    <div class="text-sm text-yellow-700">At-Risk Objectives</div>
+                </div>
+                <div class="bg-blue-50 rounded-lg p-4">
+                    <div class="text-2xl font-bold text-blue-600">{{ total_objectives }}</div>
+                    <div class="text-sm text-blue-700">Total Objectives</div>
                 </div>
             </div>
-            {% endif %}
         </div>
     </div>
 </div>
-
-<style>
-.timeline {
-    position: relative;
-    padding-left: 30px;
-}
-
-.timeline::before {
-    content: '';
-    position: absolute;
-    left: 15px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: #dee2e6;
-}
-
-.timeline-item {
-    position: relative;
-    margin-bottom: 20px;
-}
-
-.timeline-marker {
-    position: absolute;
-    left: -23px;
-    top: 5px;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    border: 2px solid #fff;
-}
-
-.timeline-content {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 5px;
-    border-left: 3px solid #007bff;
-}
-
-.border-left-success {
-    border-left: 3px solid #28a745 !important;
-}
-
-.border-left-warning {
-    border-left: 3px solid #ffc107 !important;
-}
-
-.border-left-danger {
-    border-left: 3px solid #dc3545 !important;
-}
-
-@media print {
-    .btn {
-        display: none !important;
-    }
-    
-    .card {
-        border: 1px solid #000 !important;
-        box-shadow: none !important;
-    }
-}
-</style>
 {% endblock %}

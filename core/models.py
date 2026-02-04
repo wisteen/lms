@@ -14,6 +14,7 @@ class User(AbstractUser):
         ('subject_teacher', 'Subject Teacher'),
         ('class_teacher', 'Class Teacher'),
         ('librarian', 'Librarian'),
+        ('accountant', 'Accountant'),
         ('super_admin', 'Super Admin'),
     ]
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='student')
@@ -450,8 +451,8 @@ class Curriculum(models.Model):
         from django.core.exceptions import ValidationError
         from .validators_academic import AcademicDataValidator
         
-        # Original validation
-        if self.is_published and not self.learning_objectives.exists():
+        # Original validation - only check if instance has been saved
+        if self.pk and self.is_published and not self.learning_objectives.exists():
             raise ValidationError("Curriculum must have at least one learning objective before publishing.")
         
         # Enhanced relationship validation
@@ -666,11 +667,11 @@ class AcademicEvent(models.Model):
         from django.core.exceptions import ValidationError
         from .validators_academic import AcademicDataValidator
         
-        if self.end_date <= self.start_date:
+        if self.start_date and self.end_date and self.end_date <= self.start_date:
             raise ValidationError("End date must be after start date.")
         
         # Validate term alignment for academic events
-        if self.terms.exists():
+        if self.pk and self.terms.exists():
             for term in self.terms.all():
                 if self.start_date.date() < term.start_date or self.end_date.date() > term.end_date:
                     raise ValidationError(f"Event dates must fall within the selected term: {term.name} ({term.start_date} to {term.end_date})")
@@ -679,7 +680,7 @@ class AcademicEvent(models.Model):
         if self.is_recurring and not self.recurrence_pattern:
             raise ValidationError("Recurring events must have a recurrence pattern specified.")
         
-        if self.recurrence_pattern and self.recurrence_pattern not in ['daily', 'weekly', 'monthly', 'yearly']:
+        if self.recurrence_pattern and self.recurrence_pattern.lower() not in ['daily', 'weekly', 'monthly', 'yearly']:
             raise ValidationError("Recurrence pattern must be one of: daily, weekly, monthly, yearly")
         
         # Enhanced relationship validation

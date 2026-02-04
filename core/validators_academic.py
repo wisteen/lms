@@ -23,10 +23,10 @@ class AcademicDataValidator:
         """
         errors = []
         
-        # Validate created_by user exists and has appropriate role
-        if curriculum.created_by_id is None:
+        # Validate created_by user exists and has appropriate role - only if saved
+        if curriculum.pk and curriculum.created_by_id is None:
             errors.append("Curriculum must have a creator.")
-        elif curriculum.created_by:
+        elif curriculum.pk and curriculum.created_by:
             if not hasattr(curriculum.created_by, 'role'):
                 errors.append("Curriculum creator must have a defined role.")
             elif curriculum.created_by.role not in ['super_admin', 'subject_teacher']:
@@ -88,7 +88,9 @@ class AcademicDataValidator:
         
         # Validate teacher exists and has appropriate permissions
         if not lesson_plan.teacher_id:
-            errors.append("Lesson plan must be associated with a teacher.")
+            # Only error if this is being saved (has pk) - during form validation teacher isn't set yet
+            if lesson_plan.pk:
+                errors.append("Lesson plan must be associated with a teacher.")
         elif lesson_plan.teacher_id and lesson_plan.teacher:
             # Check if teacher teaches the subject
             if lesson_plan.subject and lesson_plan.subject not in lesson_plan.teacher.subjects.all():
@@ -228,9 +230,10 @@ class AcademicDataValidator:
         if not assignment.subject_id:
             errors.append("Assignment must be associated with a subject.")
         
-        # Validate teacher exists and can teach the subject
+        # Validate teacher exists and can teach the subject - only if saved
         if not assignment.teacher_id:
-            errors.append("Assignment must be associated with a teacher.")
+            if assignment.pk:
+                errors.append("Assignment must be associated with a teacher.")
         elif assignment.teacher and assignment.subject:
             if assignment.subject not in assignment.teacher.subjects.all():
                 errors.append(f"Teacher '{assignment.teacher}' is not qualified to teach '{assignment.subject}'.")
@@ -252,6 +255,10 @@ class AcademicDataValidator:
         """
         errors = []
         
+        # Only validate if submission is saved (has pk)
+        if not submission.pk:
+            return errors
+        
         # Validate assignment exists
         if not submission.assignment_id:
             errors.append("Submission must be associated with an assignment.")
@@ -261,7 +268,7 @@ class AcademicDataValidator:
             errors.append("Submission must be associated with a student.")
         
         # Validate student is in one of the assignment's target classes
-        if submission.assignment and submission.student:
+        if submission.assignment_id and submission.student_id and submission.assignment and submission.student:
             student_classes = [submission.student.school_class]
             assignment_classes = list(submission.assignment.school_classes.all())
             
@@ -269,7 +276,7 @@ class AcademicDataValidator:
                 errors.append(f"Student '{submission.student}' is not in any of the assignment's target classes.")
         
         # Validate submission is not after deadline (unless late submissions allowed)
-        if submission.assignment and not submission.assignment.allow_late_submission:
+        if submission.assignment_id and submission.assignment and not submission.assignment.allow_late_submission:
             if submission.submitted_at and submission.submitted_at > submission.assignment.due_date:
                 errors.append("Late submissions are not allowed for this assignment.")
         

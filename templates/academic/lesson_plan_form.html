@@ -1,160 +1,137 @@
 {% extends 'base.html' %}
-{% load static %}
 
 {% block title %}{{ action }} Lesson Plan{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">{{ action }} Lesson Plan</h3>
-                    <div class="card-tools">
-                        <a href="{% url 'academic:lesson_plan_list' %}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Cancel
-                        </a>
-                    </div>
-                </div>
-                
-                <form method="post" class="card-body">
-                    {% csrf_token %}
-                    
-                    <!-- Basic Information -->
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="form-group">
-                                <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
-                                {{ form.title }}
-                                {% if form.title.errors %}
-                                <div class="text-danger">{{ form.title.errors }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="{{ form.estimated_duration.id_for_label }}">{{ form.estimated_duration.label }}</label>
-                                {{ form.estimated_duration }}
-                                {% if form.estimated_duration.errors %}
-                                <div class="text-danger">{{ form.estimated_duration.errors }}</div>
-                                {% endif %}
-                                <small class="form-text text-muted">Format: HH:MM:SS (e.g., 01:30:00 for 1 hour 30 minutes)</small>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="{{ form.curriculum.id_for_label }}">{{ form.curriculum.label }}</label>
-                                {{ form.curriculum }}
-                                {% if form.curriculum.errors %}
-                                <div class="text-danger">{{ form.curriculum.errors }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="{{ form.subject.id_for_label }}">{{ form.subject.label }}</label>
-                                {{ form.subject }}
-                                {% if form.subject.errors %}
-                                <div class="text-danger">{{ form.subject.errors }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="{{ form.school_class.id_for_label }}">{{ form.school_class.label }}</label>
-                                {{ form.school_class }}
-                                {% if form.school_class.errors %}
-                                <div class="text-danger">{{ form.school_class.errors }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Learning Objectives -->
-                    <div class="form-group">
-                        <label for="{{ form.learning_objectives.id_for_label }}">{{ form.learning_objectives.label }}</label>
-                        <div id="objectives-container" class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
-                            <div class="text-muted mb-2">Select a curriculum and subject first to see available objectives.</div>
-                            {% for choice in form.learning_objectives %}
-                            <div class="form-check objective-option" data-subject="{{ choice.choice_value }}" style="display: none;">
-                                {{ choice.tag }}
-                                <label class="form-check-label" for="{{ choice.id_for_label }}">
-                                    <strong>{{ choice.choice_label }}</strong>
-                                </label>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        {% if form.learning_objectives.errors %}
-                        <div class="text-danger">{{ form.learning_objectives.errors }}</div>
-                        {% endif %}
-                        <small class="form-text text-muted">Select the learning objectives this lesson will address.</small>
-                    </div>
-                    
-                    <!-- Lesson Content -->
-                    <div class="form-group">
-                        <label for="{{ form.content.id_for_label }}">{{ form.content.label }}</label>
-                        {{ form.content }}
-                        {% if form.content.errors %}
-                        <div class="text-danger">{{ form.content.errors }}</div>
-                        {% endif %}
-                        <small class="form-text text-muted">Detailed lesson plan content including activities, explanations, and teaching methods.</small>
-                    </div>
-                    
-                    <!-- Resources -->
-                    <div class="form-group">
-                        <label for="{{ form.resources.id_for_label }}">{{ form.resources.label }}</label>
-                        {{ form.resources }}
-                        {% if form.resources.errors %}
-                        <div class="text-danger">{{ form.resources.errors }}</div>
-                        {% endif %}
-                        <small class="form-text text-muted">List any materials, books, websites, or other resources needed for this lesson.</small>
-                    </div>
-                    
-                    <!-- Completion Status -->
-                    <div class="form-group">
-                        <div class="form-check">
-                            {{ form.is_completed }}
-                            <label class="form-check-label" for="{{ form.is_completed.id_for_label }}">
-                                {{ form.is_completed.label }}
-                            </label>
-                        </div>
-                        {% if form.is_completed.errors %}
-                        <div class="text-danger">{{ form.is_completed.errors }}</div>
-                        {% endif %}
-                        <small class="form-text text-muted">Mark as completed if this lesson has been taught.</small>
-                    </div>
-                    
-                    <!-- Form Errors -->
-                    {% if form.non_field_errors %}
-                    <div class="alert alert-danger">
-                        {{ form.non_field_errors }}
-                    </div>
-                    {% endif %}
-                    
-                    <!-- Submit Buttons -->
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> {{ action }} Lesson Plan
-                        </button>
-                        <a href="{% url 'academic:lesson_plan_list' %}" class="btn btn-secondary ml-2">
-                            <i class="fas fa-times"></i> Cancel
-                        </a>
-                    </div>
-                </form>
-            </div>
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg">
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h3 class="text-2xl font-bold text-gray-900">{{ action }} Lesson Plan</h3>
+            <a href="{% url 'academic:lesson_plan_list' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg inline-flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i> Cancel
+            </a>
         </div>
+        
+        <form method="post" class="p-6 space-y-6">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                <div class="flex">
+                    <i class="fas fa-exclamation-circle text-red-400 mr-3"></i>
+                    <div class="text-sm text-red-700">{{ form.non_field_errors }}</div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.title.label }}</label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.title.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.curriculum.label }}</label>
+                    {{ form.curriculum }}
+                    {% if form.curriculum.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.curriculum.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.subject.label }}</label>
+                    {{ form.subject }}
+                    {% if form.subject.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.subject.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.school_class.label }}</label>
+                {{ form.school_class }}
+                {% if form.school_class.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.school_class.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.learning_objectives.label }}</label>
+                <div id="id_learning_objectives" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-4">
+                    {% if form.learning_objectives.field.queryset.exists %}
+                        {% for choice in form.learning_objectives %}
+                        <label class="flex items-start space-x-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                            {{ choice.tag }}
+                            <span class="text-sm text-gray-700">{{ choice.choice_label }}</span>
+                        </label>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-sm text-gray-500">Select a curriculum and subject to load learning objectives.</p>
+                    {% endif %}
+                </div>
+                {% if form.learning_objectives.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.learning_objectives.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.content.label }}</label>
+                {{ form.content }}
+                {% if form.content.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.content.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.resources.label }}</label>
+                {{ form.resources }}
+                {% if form.resources.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.resources.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.estimated_duration.label }}</label>
+                    {{ form.estimated_duration }}
+                    <p class="mt-1 text-xs text-gray-500">Format: HH:MM:SS (e.g., 01:30:00)</p>
+                    {% if form.estimated_duration.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.estimated_duration.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label class="flex items-center space-x-2 p-4 border border-gray-200 rounded-lg">
+                        {{ form.is_completed }}
+                        <span class="text-sm font-medium text-gray-700">{{ form.is_completed.label }}</span>
+                    </label>
+                    {% if form.is_completed.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.is_completed.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="flex space-x-4">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg inline-flex items-center">
+                    <i class="fas fa-save mr-2"></i> {{ action }} Lesson Plan
+                </button>
+                <a href="{% url 'academic:lesson_plan_list' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg inline-flex items-center">
+                    <i class="fas fa-times mr-2"></i> Cancel
+                </a>
+            </div>
+        </form>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function() {
-    // Function to update learning objectives based on curriculum and subject selection
-    function updateLearningObjectives() {
+    $('input[type="text"], input[type="number"], textarea, select').not('[type="checkbox"]').addClass('w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent');
+    $('input[type="checkbox"]').addClass('w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500');
+    
+    // Load learning objectives when curriculum and subject change
+    function loadLearningObjectives() {
         var curriculumId = $('#id_curriculum').val();
         var subjectId = $('#id_subject').val();
         
@@ -165,35 +142,28 @@ $(document).ready(function() {
                     'curriculum_id': curriculumId,
                     'subject_id': subjectId
                 },
-                success: function(response) {
-                    var container = $('#objectives-container');
-                    container.find('.objective-option').hide();
-                    container.find('.text-muted').hide();
+                success: function(data) {
+                    var container = $('#id_learning_objectives').parent();
+                    container.empty();
                     
-                    if (response.objectives && response.objectives.length > 0) {
-                        // Show relevant objectives
-                        response.objectives.forEach(function(objective) {
-                            var checkbox = container.find('input[value="' + objective.id + '"]');
-                            if (checkbox.length) {
-                                checkbox.closest('.objective-option').show();
-                            }
+                    if (data.objectives.length > 0) {
+                        data.objectives.forEach(function(obj) {
+                            container.append(
+                                '<label class="flex items-start space-x-2 p-2 hover:bg-gray-50 rounded cursor-pointer">' +
+                                '<input type="checkbox" name="learning_objectives" value="' + obj.id + '" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">' +
+                                '<span class="text-sm text-gray-700">' + obj.title + '</span>' +
+                                '</label>'
+                            );
                         });
                     } else {
-                        container.find('.text-muted').text('No learning objectives found for this curriculum and subject combination.').show();
+                        container.append('<p class="text-sm text-gray-500">No learning objectives available for this curriculum and subject.</p>');
                     }
                 }
             });
-        } else {
-            $('#objectives-container .objective-option').hide();
-            $('#objectives-container .text-muted').text('Select a curriculum and subject first to see available objectives.').show();
         }
     }
     
-    // Update objectives when curriculum or subject changes
-    $('#id_curriculum, #id_subject').change(updateLearningObjectives);
-    
-    // Initial load
-    updateLearningObjectives();
+    $('#id_curriculum, #id_subject').change(loadLearningObjectives);
 });
 </script>
 {% endblock %}

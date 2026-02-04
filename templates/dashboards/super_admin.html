@@ -98,6 +98,26 @@
         <div class="bg-white rounded-lg shadow p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Academic Management</h3>
             <div class="grid grid-cols-2 gap-3">
+                <a href="{% url 'academic:curriculum_list' %}" 
+                   class="bg-blue-600 text-white text-center py-2 px-4 rounded hover:bg-blue-700">
+                    Curriculum Management
+                </a>
+                <a href="{% url 'academic:lesson_plan_list' %}" 
+                   class="bg-indigo-600 text-white text-center py-2 px-4 rounded hover:bg-indigo-700">
+                    Lesson Plans
+                </a>
+                <a href="{% url 'academic:coverage_report' %}" 
+                   class="bg-purple-600 text-white text-center py-2 px-4 rounded hover:bg-purple-700">
+                    Coverage Reports
+                </a>
+                <a href="{% url 'academic:assignment_list' %}" 
+                   class="bg-green-600 text-white text-center py-2 px-4 rounded hover:bg-green-700">
+                    Assignments
+                </a>
+                <a href="{% url 'academic:calendar' %}" 
+                   class="bg-yellow-600 text-white text-center py-2 px-4 rounded hover:bg-yellow-700">
+                    📅 Academic Calendar
+                </a>
                 <a href="/admin/core/schoolclass/" 
                    class="bg-indigo-600 text-white text-center py-2 px-4 rounded hover:bg-indigo-700">
                     Manage Classes

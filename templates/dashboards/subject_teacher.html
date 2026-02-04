@@ -58,6 +58,26 @@
                    class="block w-full bg-blue-600 text-white text-center py-3 px-4 rounded hover:bg-blue-700 font-medium">
                     📊 Results Overview
                 </a>
+                <a href="{% url 'academic:curriculum_list' %}" 
+                   class="block w-full bg-blue-600 text-white text-center py-2 px-4 rounded hover:bg-blue-700">
+                    📚 Curriculum Management
+                </a>
+                <a href="{% url 'academic:lesson_plan_list' %}" 
+                   class="block w-full bg-indigo-600 text-white text-center py-2 px-4 rounded hover:bg-indigo-700">
+                    📝 Lesson Plans
+                </a>
+                <a href="{% url 'academic:assignment_list' %}" 
+                   class="block w-full bg-orange-600 text-white text-center py-2 px-4 rounded hover:bg-orange-700">
+                    📋 Assignment Management
+                </a>
+                <a href="{% url 'academic:coverage_report' %}" 
+                   class="block w-full bg-purple-600 text-white text-center py-2 px-4 rounded hover:bg-purple-700">
+                    📈 Coverage Reports
+                </a>
+                <a href="{% url 'academic:calendar' %}" 
+                   class="block w-full bg-yellow-600 text-white text-center py-2 px-4 rounded hover:bg-yellow-700">
+                    📅 Academic Calendar
+                </a>
                 <a href="{% url 'component_results' %}" 
                    class="block w-full bg-indigo-600 text-white text-center py-2 px-4 rounded hover:bg-indigo-700">
                     📝 Component Results
@@ -70,9 +90,6 @@
                    class="block w-full bg-teal-600 text-white text-center py-2 px-4 rounded hover:bg-teal-700">
                     📚 Library
                 </a>
-                <button class="block w-full bg-purple-600 text-white text-center py-2 px-4 rounded hover:bg-purple-700">
-                    ✏️ Grade Theory Tests
-                </button>
             </div>
         </div>
     </div>
