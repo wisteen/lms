@@ -81,7 +81,13 @@ def dashboard(request):
         })
         return render(request, 'dashboards/super_admin.html', context)
     
-    return render(request, 'dashboards/default.html', context)
+    elif user.role == 'librarian':
+        # Redirect librarian to library dashboard
+        return redirect('library_dashboard')
+    
+    # Fallback for any other roles
+    messages.warning(request, 'Your role does not have a specific dashboard. Please contact administrator.')
+    return redirect('login')
 
 @login_required
 def get_students_by_class(request):

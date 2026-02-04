@@ -1,0 +1,4 @@
+# file: C:\Users\HomePC\Documents\lms\website\urls.py
+# hypothesis_version: 6.151.4
+
+['about', 'about/', 'academics', 'academics/', 'admissions', 'admissions/', 'admissions/inquiry/', 'admissions_inquiry', 'home', 'newsletter_subscribe', 'school-fees/', 'school_fees', 'website']

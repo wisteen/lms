@@ -1,0 +1,4 @@
+# file: C:\Users\HomePC\Documents\lms\core\forms_academic.py
+# hypothesis_version: 6.151.4
+
+[1024, '.', '.doc', '.docx', '.jpeg', '.jpg', '.pdf', '.png', '.txt', '.zip', 'Friday', 'Monday', 'Saturday', 'Sunday', 'Thursday', 'Tuesday', 'Wednesday', 'academic_year', 'assignment', 'attachment', 'content', 'curriculum', 'date', 'datetime-local', 'day_of_week', 'description', 'due_date', 'end_date', 'end_time', 'estimated_duration', 'event_type', 'file', 'grade_level', 'is_active', 'is_completed', 'is_published', 'is_recurring', 'learning_objectives', 'max_score', 'name', 'order', 'placeholder', 'recurrence_pattern', 'resources', 'room', 'rows', 'school_class', 'school_classes', 'start_date', 'start_time', 'subject', 'subject_teacher', 'subjects', 'submission_text', 'teacher', 'term', 'terms', 'time', 'time_slot', 'title', 'type', 'user']

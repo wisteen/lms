@@ -1,0 +1,4 @@
+# file: C:\Users\HomePC\Documents\lms\website\admin.py
+# hypothesis_version: 6.151.4
+
+['-', 'DEFAULT_FROM_EMAIL', 'active', 'caption', 'created_at', 'description', 'email', 'excerpt', 'full_name', 'is_active', 'is_featured', 'message', 'name', 'no-reply@example.com', 'order', 'processed', 'published', 'question', 'sent', 'sent_at', 'slug', 'subscribed_at', 'thumb', 'title']

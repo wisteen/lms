@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ assignment.title }} - Assignment Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="card-title">{{ assignment.title }}</h3>
+                        <p class="text-muted mb-0">
+                            {{ assignment.subject.name }} - {{ assignment.teacher.user.get_full_name }}
+                        </p>
+                    </div>
+                    <div>
+                        {% if user.role == 'student' %}
+                            {% if can_submit %}
+                            <a href="{% url 'academic:submit_assignment' assignment.id %}" class="btn btn-primary">
+                                {% if submission %}
+                                <i class="fas fa-edit"></i> Edit Submission
+                                {% else %}
+                                <i class="fas fa-upload"></i> Submit Assignment
+                                {% endif %}
+                            </a>
+                            {% endif %}
+                        {% elif user.role == 'subject_teacher' %}
+                            <a href="{% url 'academic:assignment_edit' assignment.id %}" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Edit Assignment
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'academic:assignment_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Assignment Info -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Assignment Information</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Subject:</strong></td>
+                                    <td>{{ assignment.subject.name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Teacher:</strong></td>
+                                    <td>{{ assignment.teacher.user.get_full_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Due Date:</strong></td>
+                                    <td>
+                                        {{ assignment.due_date|date:"M d, Y H:i" }}
+                                        {% if assignment.is_overdue %}
+                                        <span class="badge badge-danger ml-2">Overdue</span>
+                                        {% else %}
+                                        <span class="badge badge-success ml-2">Active</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Max Score:</strong></td>
+                                    <td>{{ assignment.max_score|default:"Not specified" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Late Submission:</strong></td>
+                                    <td>
+                                        {% if assignment.allow_late_submission %}
+                                        <span class="text-success">Allowed</span>
+                                        {% if assignment.late_penalty_percentage > 0 %}
+                                        ({{ assignment.late_penalty_percentage }}% penalty)
+                                        {% endif %}
+                                        {% else %}
+                                        <span class="text-danger">Not Allowed</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Classes Assigned</h5>
+                            <div class="mb-3">
+                                {% for class in assignment.school_classes.all %}
+                                <span class="badge badge-info mr-1">{{ class.name }} {{ class.stream }}</span>
+                                {% endfor %}
+                            </div>
+                            
+                            {% if assignment.attachment %}
+                            <h5>Attachment</h5>
+                            <a href="{{ assignment.attachment.url }}" class="btn btn-outline-primary btn-sm" target="_blank">
+                                <i class="fas fa-download"></i> Download Attachment
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Assignment Description -->
+                    <div class="mb-4">
+                        <h5>Description</h5>
+                        <div class="border p-3 rounded">
+                            {{ assignment.description|safe }}
+                        </div>
+                    </div>
+                    
+                    <!-- Student View: Submission Status -->
+                    {% if user.role == 'student' %}
+                    <div class="mb-4">
+                        <h5>Your Submission</h5>
+                        {% if submission %}
+                        <div class="alert alert-success">
+                            <h6><i class="fas fa-check-circle"></i> Submitted</h6>
+                            <p><strong>Submitted on:</strong> {{ submission.submitted_at|date:"M d, Y H:i" }}</p>
+                            {% if submission.is_late %}
+                            <p><span class="badge badge-warning">Late Submission</span></p>
+                            {% endif %}
+                            {% if submission.score %}
+                            <p><strong>Score:</strong> {{ submission.score }}/{{ assignment.max_score|default:"--" }}</p>
+                            {% endif %}
+                            {% if submission.feedback %}
+                            <p><strong>Feedback:</strong> {{ submission.feedback }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Submission Content -->
+                        {% if submission.submission_text %}
+                        <div class="border p-3 rounded mb-3">
+                            <h6>Your Response:</h6>
+                            {{ submission.submission_text|safe }}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Submitted Files -->
+                        {% if submission.files.all %}
+                        <div class="mb-3">
+                            <h6>Submitted Files:</h6>
+                            {% for file in submission.files.all %}
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-file mr-2"></i>
+                                <a href="{{ file.file.url }}" target="_blank">{{ file.original_filename }}</a>
+                                <small class="text-muted ml-2">({{ file.uploaded_at|date:"M d, Y H:i" }})</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i> You have not submitted this assignment yet.
+                            {% if can_submit %}
+                            <a href="{% url 'academic:submit_assignment' assignment.id %}" class="btn btn-primary btn-sm ml-2">
+                                Submit Now
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Teacher View: Submission Statistics -->
+                    {% if user.role == 'subject_teacher' %}
+                    <div class="mb-4">
+                        <h5>Submission Statistics</h5>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body text-center">
+                                        <h4>{{ stats.total_students }}</h4>
+                                        <p class="mb-0">Total Students</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <h4>{{ stats.submitted_count }}</h4>
+                                        <p class="mb-0">Submitted</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-warning text-white">
+                                    <div class="card-body text-center">
+                                        <h4>{{ stats.late_count }}</h4>
+                                        <p class="mb-0">Late Submissions</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-danger text-white">
+                                    <div class="card-body text-center">
+                                        <h4>{{ stats.pending_count }}</h4>
+                                        <p class="mb-0">Pending</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submissions List -->
+                    <div class="mb-4">
+                        <h5>Student Submissions</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Class</th>
+                                        <th>Status</th>
+                                        <th>Submitted At</th>
+                                        <th>Score</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for submission in submissions %}
+                                    <tr>
+                                        <td>{{ submission.student.user.get_full_name }}</td>
+                                        <td>{{ submission.student.school_class.name }}</td>
+                                        <td>
+                                            {% if submission.is_late %}
+                                            <span class="badge badge-warning">Late</span>
+                                            {% else %}
+                                            <span class="badge badge-success">On Time</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ submission.submitted_at|date:"M d, Y H:i" }}</td>
+                                        <td>
+                                            {% if submission.score %}
+                                            {{ submission.score }}/{{ assignment.max_score|default:"--" }}
+                                            {% else %}
+                                            <span class="text-muted">Not graded</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'academic:grade_submission' submission.id %}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-edit"></i> Grade
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">No submissions yet</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

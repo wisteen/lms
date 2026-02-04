@@ -1,0 +1,4 @@
+# file: C:\Users\HomePC\Documents\lms\core\validators_academic.py
+# hypothesis_version: 6.151.4
+
+[100, 2000, 2100, '-', 'count', 'errors', 'field', 'invalid_records', 'issues', 'model', 'on_delete', 'related_model', 'role', 'school_class', 'subject', 'subject_teacher', 'super_admin', 'timestamp', 'total_issues', 'total_records']

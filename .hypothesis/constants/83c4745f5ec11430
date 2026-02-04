@@ -1,0 +1,4 @@
+# file: C:\Users\HomePC\Documents\lms\core\urls_financial.py
+# hypothesis_version: 6.151.4
+
+['create_fee_structure', 'create_scholarship', 'fee_management', 'financial/', 'financial/fees/', 'financial/payroll/', 'financial/reports/', 'financial_dashboard', 'financial_reports', 'generate_payroll', 'payroll_management', 'record_payment']

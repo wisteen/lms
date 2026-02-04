@@ -118,6 +118,14 @@
                    class="bg-red-600 text-white text-center py-2 px-4 rounded hover:bg-red-700">
                     Generate Result Tokens
                 </a>
+                <a href="{% url 'financial:financial_dashboard' %}" 
+                   class="bg-indigo-600 text-white text-center py-2 px-4 rounded hover:bg-indigo-700">
+                    Financial Management
+                </a>
+                <a href="{% url 'library_dashboard' %}" 
+                   class="bg-teal-600 text-white text-center py-2 px-4 rounded hover:bg-teal-700">
+                    Library Management
+                </a>
             </div>
         </div>
     </div>
@@ -130,25 +138,25 @@
                 <div class="border border-gray-200 rounded-lg p-4">
                     <h4 class="font-medium text-gray-900 mb-2">Academic Performance</h4>
                     <p class="text-sm text-gray-600 mb-3">Overall school performance metrics and trends.</p>
-                    <button class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                    <a href="{% url 'academic_performance_report' %}" class="block w-full bg-blue-600 text-white text-center py-2 px-4 rounded hover:bg-blue-700">
                         Generate Report
-                    </button>
+                    </a>
                 </div>
                 
                 <div class="border border-gray-200 rounded-lg p-4">
                     <h4 class="font-medium text-gray-900 mb-2">Attendance Report</h4>
                     <p class="text-sm text-gray-600 mb-3">Student and teacher attendance statistics.</p>
-                    <button class="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+                    <a href="{% url 'attendance_report' %}" class="block w-full bg-green-600 text-white text-center py-2 px-4 rounded hover:bg-green-700">
                         Generate Report
-                    </button>
+                    </a>
                 </div>
                 
                 <div class="border border-gray-200 rounded-lg p-4">
                     <h4 class="font-medium text-gray-900 mb-2">System Usage</h4>
                     <p class="text-sm text-gray-600 mb-3">Platform usage and activity statistics.</p>
-                    <button class="w-full bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700">
+                    <a href="{% url 'system_usage_report' %}" class="block w-full bg-purple-600 text-white text-center py-2 px-4 rounded hover:bg-purple-700">
                         Generate Report
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>

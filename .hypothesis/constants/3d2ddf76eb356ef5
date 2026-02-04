@@ -1,0 +1,4 @@
+# file: C:\Users\HomePC\Documents\lms\core\urls_academic.py
+# hypothesis_version: 6.151.4
+
+['academic', 'assignment_create', 'assignment_detail', 'assignment_list', 'assignments/', 'assignments/create/', 'calendar', 'calendar/', 'coverage-report/', 'coverage_report', 'curriculum/', 'curriculum/create/', 'curriculum_create', 'curriculum_detail', 'curriculum_edit', 'curriculum_list', 'lesson-plans/', 'lesson-plans/create/', 'lesson_plan_create', 'lesson_plan_detail', 'lesson_plan_list', 'submit_assignment']

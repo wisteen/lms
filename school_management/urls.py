@@ -27,6 +27,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path('', include('core.urls')),
+    path('academic/', include('core.urls_academic')),
+    path('', include('core.urls_reports')),
+    path('', include(('core.urls_financial', 'financial'), namespace='financial')),
+    path('', include('core.urls_library')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

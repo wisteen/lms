@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Submit Assignment - {{ assignment.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>
+                        {% if existing_submission %}
+                        Edit Submission
+                        {% else %}
+                        Submit Assignment
+                        {% endif %}
+                    </h2>
+                    <p class="text-muted">{{ assignment.title }} - {{ assignment.subject.name }}</p>
+                </div>
+                <a href="{% url 'academic:assignment_detail' assignment.id %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Assignment
+                </a>
+            </div>
+
+            <div class="row">
+                <div class="col-md-8">
+                    <!-- Submission Form -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-upload"></i> Your Submission
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                
+                                <div class="form-group">
+                                    <label for="{{ form.submission_text.id_for_label }}">Response</label>
+                                    {{ form.submission_text }}
+                                    {% if form.submission_text.errors %}
+                                    <div class="text-danger">{{ form.submission_text.errors.0 }}</div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Write your response to the assignment</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="{{ file_form.file.id_for_label }}">Upload File</label>
+                                    {{ file_form.file|add_class:"form-control-file" }}
+                                    {% if file_form.file.errors %}
+                                    <div class="text-danger">{{ file_form.file.errors.0 }}</div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">
+                                        Optional: Upload supporting documents, images, or other files
+                                    </small>
+                                </div>
+
+                                <!-- Existing Files -->
+                                {% if existing_submission and existing_submission.files.all %}
+                                <div class="form-group">
+                                    <label>Previously Uploaded Files</label>
+                                    <div class="list-group">
+                                        {% for file in existing_submission.files.all %}
+                                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <i class="fas fa-file mr-2"></i>
+                                                <a href="{{ file.file.url }}" target="_blank">{{ file.original_filename }}</a>
+                                                <small class="text-muted ml-2">({{ file.uploaded_at|date:"M d, Y" }})</small>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                    onclick="confirmFileDelete({{ file.id }})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <div class="form-group mt-4">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-upload"></i> 
+                                        {% if existing_submission %}
+                                        Update Submission
+                                        {% else %}
+                                        Submit Assignment
+                                        {% endif %}
+                                    </button>
+                                    <a href="{% url 'academic:assignment_detail' assignment.id %}" class="btn btn-secondary ml-2">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <!-- Assignment Info -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Assignment Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Subject:</strong></td>
+                                    <td>{{ assignment.subject.name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Teacher:</strong></td>
+                                    <td>{{ assignment.teacher.user.get_full_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Due Date:</strong></td>
+                                    <td>
+                                        {{ assignment.due_date|date:"M d, Y H:i" }}
+                                        {% if assignment.is_overdue %}
+                                        <br><span class="badge badge-danger">Overdue</span>
+                                        {% else %}
+                                        <br><span class="badge badge-success">Active</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Max Score:</strong></td>
+                                    <td>{{ assignment.max_score|default:"Not specified" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Late Submission:</strong></td>
+                                    <td>
+                                        {% if assignment.allow_late_submission %}
+                                        <span class="text-success">Allowed</span>
+                                        {% if assignment.late_penalty_percentage > 0 %}
+                                        <br><small class="text-muted">{{ assignment.late_penalty_percentage }}% penalty</small>
+                                        {% endif %}
+                                        {% else %}
+                                        <span class="text-danger">Not Allowed</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+
+                            {% if assignment.attachment %}
+                            <div class="mt-3">
+                                <h6>Assignment Attachment</h6>
+                                <a href="{{ assignment.attachment.url }}" class="btn btn-outline-primary btn-sm" target="_blank">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Assignment Description -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">Instructions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div style="max-height: 300px; overflow-y: auto;">
+                                {{ assignment.description|safe }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submission Status -->
+                    {% if existing_submission %}
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">Current Status</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> 
+                                <strong>Previously Submitted</strong>
+                                <br>{{ existing_submission.submitted_at|date:"M d, Y H:i" }}
+                                {% if existing_submission.is_late %}
+                                <br><span class="badge badge-warning">Late Submission</span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if existing_submission.score %}
+                            <div class="alert alert-success">
+                                <strong>Score:</strong> {{ existing_submission.score }}/{{ assignment.max_score|default:"--" }}
+                            </div>
+                            {% endif %}
+                            
+                            {% if existing_submission.feedback %}
+                            <div class="alert alert-secondary">
+                                <strong>Teacher Feedback:</strong>
+                                <br>{{ existing_submission.feedback }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- File Delete Confirmation Modal -->
+<div class="modal fade" id="fileDeleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete File</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this file? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <form id="fileDeleteForm" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmFileDelete(fileId) {
+    document.getElementById('fileDeleteForm').action = '/academic/submission-files/' + fileId + '/delete/';
+    $('#fileDeleteModal').modal('show');
+}
+
+// Warn user about unsaved changes
+let formChanged = false;
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const inputs = form.querySelectorAll('input, textarea, select');
+    
+    inputs.forEach(input => {
+        input.addEventListener('change', () => {
+            formChanged = true;
+        });
+    });
+    
+    window.addEventListener('beforeunload', function(e) {
+        if (formChanged) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+    
+    form.addEventListener('submit', () => {
+        formChanged = false;
+    });
+});
+</script>
+{% endblock %}

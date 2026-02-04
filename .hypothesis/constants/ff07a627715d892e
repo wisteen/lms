@@ -1,0 +1,4 @@
+# file: C:\Users\HomePC\Documents\lms\core\services_academic.py
+# hypothesis_version: 6.151.4
+
+[100, '-', '-created_at', 'academic_year', 'assignment', 'assignments', 'at_risk_objectives', 'completed_lessons', 'completed_objectives', 'coverage_data', 'created_by', 'curriculum', 'daily', 'days_remaining', 'description', 'due_date', 'duration', 'end_date', 'event_type', 'exam_date', 'exclude_exam', 'exclude_timetable', 'invigilator', 'is_at_risk', 'is_late', 'is_overdue', 'is_submitted', 'last_updated', 'late_submissions', 'monthly', 'objective', 'on_time_submissions', 'order', 'pending_submissions', 'room', 'school_class', 'start_date', 'statistics', 'subject', 'submission_date', 'submission_rate', 'submission_stats', 'submitted_count', 'summary', 'teacher', 'term', 'time_remaining', 'time_slot', 'title', 'total_assignments', 'total_objectives', 'total_students', 'total_submissions', 'weekly', 'yearly']

@@ -1,0 +1,4 @@
+# file: C:\Users\HomePC\Documents\lms\core\models_financial.py
+# hypothesis_version: 6.151.4
+
+[100, 200, '-transaction_date', 'Academic Excellence', 'Active', 'Bank Transfer', 'Card', 'Cash', 'Completed', 'Equipment', 'Expense', 'Income', 'Maintenance', 'Merit Based', 'Need Based', 'Online', 'Other', 'Overdue', 'Paid', 'Partial', 'Pending', 'School Fees', 'Sports', 'Staff Salary', 'Supplies', 'Suspended', 'User', 'Utilities', 'academic', 'active', 'amount', 'bank_transfer', 'card', 'cash', 'completed', 'equipment', 'expense', 'fee_structure', 'fees', 'income', 'maintenance', 'merit', 'month', 'need', 'online', 'other', 'overdue', 'paid', 'partial', 'payments', 'pending', 'salary', 'scholarship', 'school_class', 'sports', 'student', 'supplies', 'suspended', 'teacher', 'term', 'total', 'utilities']

@@ -46,9 +46,14 @@
                    class="block w-full bg-yellow-600 text-white text-center py-2 px-4 rounded hover:bg-yellow-700">
                     Manage Attendance &amp; Comments
                 </a>
-                <button class="block w-full bg-purple-600 text-white text-center py-2 px-4 rounded hover:bg-purple-700">
-                    Send Announcement
-                </button>
+                <a href="{% url 'reports_dashboard' %}" 
+                   class="block w-full bg-purple-600 text-white text-center py-2 px-4 rounded hover:bg-purple-700">
+                    View Reports
+                </a>
+                <a href="{% url 'library_dashboard' %}" 
+                   class="block w-full bg-teal-600 text-white text-center py-2 px-4 rounded hover:bg-teal-700">
+                    Library
+                </a>
             </div>
         </div>
     </div>

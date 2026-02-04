@@ -1,0 +1,4 @@
+# file: C:\Users\HomePC\Documents\lms\school_management\urls.py
+# hypothesis_version: 6.151.4
+
+['^media/(?P<path>.*)$', 'admin/', 'ckeditor/', 'core.urls', 'document_root', 'website', 'website.urls']

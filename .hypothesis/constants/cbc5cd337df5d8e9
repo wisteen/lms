@@ -1,0 +1,4 @@
+# file: C:\Users\HomePC\Documents\lms\core\access_control.py
+# hypothesis_version: 6.151.4
+
+['activity', 'can_access_calendar', 'can_access_curricula', 'class_teacher', 'create', 'edit', 'holiday', 'role', 'student', 'subject_teacher', 'submit', 'super_admin', 'teacher', 'view']

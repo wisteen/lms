@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ lesson_plan.title }} - Lesson Plan Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="card-title">{{ lesson_plan.title }}</h3>
+                        <p class="text-muted mb-0">
+                            {{ lesson_plan.subject.name }} - {{ lesson_plan.school_class.name }}
+                        </p>
+                    </div>
+                    <div>
+                        {% if lesson_plan.is_completed %}
+                        <span class="badge badge-success badge-lg">Completed</span>
+                        {% else %}
+                        <span class="badge badge-warning badge-lg">Pending</span>
+                        {% endif %}
+                        
+                        <button class="btn {% if lesson_plan.is_completed %}btn-warning{% else %}btn-success{% endif %} ml-2 toggle-completion"
+                                data-lesson-id="{{ lesson_plan.id }}"
+                                data-current-status="{{ lesson_plan.is_completed|yesno:'true,false' }}">
+                            {% if lesson_plan.is_completed %}
+                            <i class="fas fa-undo"></i> Mark Pending
+                            {% else %}
+                            <i class="fas fa-check"></i> Mark Complete
+                            {% endif %}
+                        </button>
+                        
+                        <a href="{% url 'academic:lesson_plan_list' %}" class="btn btn-secondary ml-2">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Basic Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Curriculum</h6>
+                            <p>{{ lesson_plan.curriculum.title }} ({{ lesson_plan.curriculum.academic_year }})</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Estimated Duration</h6>
+                            <p>{{ lesson_plan.estimated_duration }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Created Date</h6>
+                            <p>{{ lesson_plan.created_at|date:"F d, Y g:i A" }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if lesson_plan.is_completed and lesson_plan.completion_date %}
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Completion Date</h6>
+                            <p class="text-success">{{ lesson_plan.completion_date|date:"F d, Y g:i A" }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Learning Objectives -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4 class="card-title">Learning Objectives</h4>
+                </div>
+                <div class="card-body">
+                    {% if lesson_plan.learning_objectives.all %}
+                    <div class="row">
+                        {% for objective in lesson_plan.learning_objectives.all %}
+                        <div class="col-md-6 mb-3">
+                            <div class="border-left border-primary pl-3">
+                                <h6 class="text-primary">{{ objective.title }}</h6>
+                                <p class="text-muted mb-1">{{ objective.description }}</p>
+                                <small class="text-info">
+                                    {{ objective.subject.name }} - Grade {{ objective.grade_level }}
+                                </small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No learning objectives specified for this lesson plan.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Lesson Content -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4 class="card-title">Lesson Content</h4>
+                </div>
+                <div class="card-body">
+                    {% if lesson_plan.content %}
+                    <div class="lesson-content">
+                        {{ lesson_plan.content|safe }}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No content specified for this lesson plan.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Resources -->
+            {% if lesson_plan.resources %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4 class="card-title">Resources</h4>
+                </div>
+                <div class="card-body">
+                    <div class="resources-content">
+                        {{ lesson_plan.resources|linebreaks }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Coverage Information -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4 class="card-title">Coverage Impact</h4>
+                </div>
+                <div class="card-body">
+                    {% if lesson_plan.is_completed %}
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i>
+                        <strong>Completed:</strong> This lesson has been marked as completed and contributes to curriculum coverage tracking.
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Pending:</strong> Mark this lesson as completed to update curriculum coverage tracking.
+                    </div>
+                    {% endif %}
+                    
+                    <p class="mb-2"><strong>This lesson covers:</strong></p>
+                    <ul>
+                        {% for objective in lesson_plan.learning_objectives.all %}
+                        <li>{{ objective.title }} ({{ objective.subject.name }})</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    $('.toggle-completion').click(function() {
+        var button = $(this);
+        var lessonId = button.data('lesson-id');
+        var currentStatus = button.data('current-status');
+        
+        $.ajax({
+            url: '{% url "academic:toggle_lesson_completion" 0 %}'.replace('0', lessonId),
+            type: 'POST',
+            data: {
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Reload the page to update the display
+                    location.reload();
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function() {
+                alert('An error occurred while updating the lesson status.');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}My Assignments{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">My Assignments</h3>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Filter Form -->
+                    <form method="get" class="mb-4">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <select name="status" class="form-control">
+                                    <option value="">All Assignments</option>
+                                    <option value="pending" {% if status_filter == "pending" %}selected{% endif %}>Pending</option>
+                                    <option value="submitted" {% if status_filter == "submitted" %}selected{% endif %}>Submitted</option>
+                                    <option value="overdue" {% if status_filter == "overdue" %}selected{% endif %}>Overdue</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-secondary">
+                                    <i class="fas fa-filter"></i> Filter
+                                </button>
+                                <a href="{% url 'academic:assignment_list' %}" class="btn btn-outline-secondary ml-2">
+                                    <i class="fas fa-times"></i> Clear
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <!-- Assignments List -->
+                    {% if assignment_info %}
+                    <div class="row">
+                        {% for info in assignment_info %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card {% if info.is_overdue %}border-danger{% elif info.is_submitted %}border-success{% else %}border-warning{% endif %}">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="card-title mb-0">{{ info.assignment.title }}</h6>
+                                    {% if info.is_submitted %}
+                                    <span class="badge badge-success">Submitted</span>
+                                    {% elif info.is_overdue %}
+                                    <span class="badge badge-danger">Overdue</span>
+                                    {% else %}
+                                    <span class="badge badge-warning">Pending</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="card-body">
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-book"></i> {{ info.assignment.subject.name }}
+                                        <br>
+                                        <i class="fas fa-user"></i> {{ info.assignment.teacher.user.get_full_name }}
+                                    </p>
+                                    
+                                    <p class="mb-2">
+                                        <strong>Due Date:</strong> 
+                                        <span class="{% if info.is_overdue %}text-danger{% endif %}">
+                                            {{ info.assignment.due_date|date:"F d, Y g:i A" }}
+                                        </span>
+                                    </p>
+                                    
+                                    {% if not info.is_overdue and not info.is_submitted %}
+                                    <p class="mb-2">
+                                        <strong>Time Remaining:</strong> 
+                                        <span class="text-info">{{ info.time_remaining }}</span>
+                                    </p>
+                                    {% endif %}
+                                    
+                                    {% if info.is_submitted %}
+                                    <p class="mb-2">
+                                        <strong>Submitted:</strong> 
+                                        <span class="text-success">{{ info.submission.submitted_at|date:"F d, Y g:i A" }}</span>
+                                        {% if info.submission.is_late %}
+                                        <span class="badge badge-warning ml-2">Late</span>
+                                        {% endif %}
+                                    </p>
+                                    {% endif %}
+                                    
+                                    <div class="description mb-3">
+                                        {{ info.assignment.description|safe|truncatewords:20 }}
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between">
+                                        <a href="{% url 'academic:assignment_detail' info.assignment.id %}" 
+                                           class="btn btn-info btn-sm">
+                                            <i class="fas fa-eye"></i> View Details
+                                        </a>
+                                        
+                                        {% if not info.is_submitted and not info.is_overdue %}
+                                        <a href="{% url 'academic:submit_assignment' info.assignment.id %}" 
+                                           class="btn btn-primary btn-sm">
+                                            <i class="fas fa-upload"></i> Submit
+                                        </a>
+                                        {% elif not info.is_submitted and info.is_overdue and info.assignment.allow_late_submission %}
+                                        <a href="{% url 'academic:submit_assignment' info.assignment.id %}" 
+                                           class="btn btn-warning btn-sm">
+                                            <i class="fas fa-upload"></i> Submit Late
+                                        </a>
+                                        {% elif info.is_submitted %}
+                                        <a href="{% url 'academic:submit_assignment' info.assignment.id %}" 
+                                           class="btn btn-secondary btn-sm">
+                                            <i class="fas fa-edit"></i> Edit Submission
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Assignments Found</h5>
+                        <p class="text-muted">
+                            {% if status_filter %}
+                            No assignments match your filter criteria.
+                            {% else %}
+                            You don't have any assignments yet.
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

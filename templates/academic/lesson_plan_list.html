@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+
+{% block title %}Lesson Plans{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">My Lesson Plans</h3>
+                    <a href="{% url 'academic:lesson_plan_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create Lesson Plan
+                    </a>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Filter Form -->
+                    <form method="get" class="mb-4">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <select name="curriculum" class="form-control">
+                                    <option value="">All Curricula</option>
+                                    {% for curriculum in curricula %}
+                                    <option value="{{ curriculum.id }}" {% if request.GET.curriculum == curriculum.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ curriculum.title }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select name="subject" class="form-control">
+                                    <option value="">All Subjects</option>
+                                    {% for subject in subjects %}
+                                    <option value="{{ subject.id }}" {% if request.GET.subject == subject.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ subject.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select name="class" class="form-control">
+                                    <option value="">All Classes</option>
+                                    {% for class in classes %}
+                                    <option value="{{ class.id }}" {% if request.GET.class == class.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ class.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select name="completed" class="form-control">
+                                    <option value="">All Status</option>
+                                    <option value="false" {% if request.GET.completed == "false" %}selected{% endif %}>Pending</option>
+                                    <option value="true" {% if request.GET.completed == "true" %}selected{% endif %}>Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <button type="submit" class="btn btn-secondary">
+                                    <i class="fas fa-filter"></i> Filter
+                                </button>
+                                <a href="{% url 'academic:lesson_plan_list' %}" class="btn btn-outline-secondary ml-2">
+                                    <i class="fas fa-times"></i> Clear
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <!-- Lesson Plans List -->
+                    {% if page_obj %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Curriculum</th>
+                                    <th>Subject</th>
+                                    <th>Class</th>
+                                    <th>Duration</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for lesson_plan in page_obj %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ lesson_plan.title }}</strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            {{ lesson_plan.learning_objectives.count }} objective(s)
+                                        </small>
+                                    </td>
+                                    <td>{{ lesson_plan.curriculum.title }}</td>
+                                    <td>
+                                        <span class="badge badge-info">{{ lesson_plan.subject.name }}</span>
+                                    </td>
+                                    <td>{{ lesson_plan.school_class.name }}</td>
+                                    <td>{{ lesson_plan.estimated_duration }}</td>
+                                    <td>
+                                        {% if lesson_plan.is_completed %}
+                                        <span class="badge badge-success">Completed</span>
+                                        <br>
+                                        <small class="text-muted">{{ lesson_plan.completion_date|date:"M d, Y" }}</small>
+                                        {% else %}
+                                        <span class="badge badge-warning">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ lesson_plan.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <a href="{% url 'academic:lesson_plan_detail' lesson_plan.id %}" 
+                                           class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        
+                                        <button class="btn btn-sm {% if lesson_plan.is_completed %}btn-warning{% else %}btn-success{% endif %} toggle-completion"
+                                                data-lesson-id="{{ lesson_plan.id }}"
+                                                data-current-status="{{ lesson_plan.is_completed|yesno:'true,false' }}">
+                                            {% if lesson_plan.is_completed %}
+                                            <i class="fas fa-undo"></i> Mark Pending
+                                            {% else %}
+                                            <i class="fas fa-check"></i> Mark Complete
+                                            {% endif %}
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                    <nav aria-label="Lesson plan pagination">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.curriculum %}&curriculum={{ request.GET.curriculum }}{% endif %}{% if request.GET.subject %}&subject={{ request.GET.subject }}{% endif %}{% if request.GET.class %}&class={{ request.GET.class }}{% endif %}{% if request.GET.completed %}&completed={{ request.GET.completed }}{% endif %}">
+                                    Previous
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if request.GET.curriculum %}&curriculum={{ request.GET.curriculum }}{% endif %}{% if request.GET.subject %}&subject={{ request.GET.subject }}{% endif %}{% if request.GET.class %}&class={{ request.GET.class }}{% endif %}{% if request.GET.completed %}&completed={{ request.GET.completed }}{% endif %}">
+                                    {{ num }}
+                                </a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.curriculum %}&curriculum={{ request.GET.curriculum }}{% endif %}{% if request.GET.subject %}&subject={{ request.GET.subject }}{% endif %}{% if request.GET.class %}&class={{ request.GET.class }}{% endif %}{% if request.GET.completed %}&completed={{ request.GET.completed }}{% endif %}">
+                                    Next
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-chalkboard-teacher fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Lesson Plans Found</h5>
+                        <p class="text-muted">
+                            {% if request.GET.curriculum or request.GET.subject or request.GET.class or request.GET.completed %}
+                            Try adjusting your filter criteria.
+                            {% else %}
+                            Start by creating your first lesson plan.
+                            {% endif %}
+                        </p>
+                        <a href="{% url 'academic:lesson_plan_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Create First Lesson Plan
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    $('.toggle-completion').click(function() {
+        var button = $(this);
+        var lessonId = button.data('lesson-id');
+        var currentStatus = button.data('current-status');
+        
+        $.ajax({
+            url: '{% url "academic:toggle_lesson_completion" 0 %}'.replace('0', lessonId),
+            type: 'POST',
+            data: {
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Reload the page to update the display
+                    location.reload();
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function() {
+                alert('An error occurred while updating the lesson status.');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
